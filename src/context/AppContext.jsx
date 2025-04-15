@@ -12,7 +12,7 @@ export const AppContextProvider = ({ children }) => {
 
   const getUserData = async () => {
     try {
-      axios.defaults.withCredentials = true; //Send cookies along with request
+      axios.defaults.withCredentials = true;
       const { data } = await axios.get(`${backendUrl}/api/user/data`);
       if (data.success) {
         setUserData(data.userData);

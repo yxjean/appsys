@@ -1,14 +1,40 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import Logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { AppContent } from "../context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { FaUser } from "react-icons/fa";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { userData, backendUrl, setUserData, setIsLoggedin } =
     useContext(AppContent);
+  const [profileImage, setProfileImage] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    // Fetch user profile to get profile picture if available
+    const fetchUserProfile = async () => {
+      if (userData) {
+        try {
+          const { data } = await axios.get(
+            "http://localhost:4000/api/user/profile",
+            { withCredentials: true }
+          );
+          if (data.success && data.user.profilePicture) {
+            setProfileImage(
+              `http://localhost:4000/uploads/profile/${data.user.profilePicture}`
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [userData]);
 
   const logout = async () => {
     try {
@@ -38,23 +64,41 @@ const Navbar = () => {
         Appraisal
       </div>
       {userData ? (
-        <div className="flex items-center mt-7">
-          <div className="w-10 h-10 flex justify-center items-center rounded-full bg-[#ff8800] text-white text-xl relative group">
-            {userData.name[0].toUpperCase()}
-            <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-10 text-3xl">
-              <ul className="list-none m-0 p-2 bg-gray-100 text-sm">
+        <div className="flex items-center relative">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() => setShowDropdown(!showDropdown)}
+          >
+            <div className="w-10 h-10 flex justify-center items-center rounded-full bg-[#ff8800] text-white text-xl overflow-hidden">
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  alt={userData.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                userData.name[0].toUpperCase()
+              )}
+            </div>
+            <h1 className="ml-2 text-md sm:text-xl font-medium text-black">
+              {userData ? userData.name : null}
+            </h1>
+          </div>
+          {showDropdown && (
+            <div className="absolute top-full right-0 mt-1 z-10 bg-gray-100 rounded shadow-md">
+              <ul className="list-none m-0 p-2 text-sm">
                 <li
-                  onClick={logout}
-                  className="py-1 px-2 hover:bg-gray-200 cursor-pointer pr-10"
+                  onClick={() => {
+                    logout();
+                    setShowDropdown(false);
+                  }}
+                  className="py-1 px-4 hover:bg-gray-200 cursor-pointer whitespace-nowrap"
                 >
                   Logout
                 </li>
               </ul>
             </div>
-          </div>
-          <h1 className="ml-2 flex items-center gap-2 text-md sm:text-xl font-medium text-black">
-            {userData ? userData.name : null}
-          </h1>
+          )}
         </div>
       ) : (
         <button

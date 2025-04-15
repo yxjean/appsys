@@ -24,7 +24,8 @@ const TeachingUndergraduateSupervision = ({ onEntryAdded = () => {} }) => {
 
     try {
       const formData = new FormData();
-      formData.append("title", "Teaching and Undergraduate Supervision Entry");
+      // Include the specific area (Teaching or Undergraduate Supervision) in the title
+      formData.append("title", `${selectedForm} Entry`);
       formData.append("area", "Teaching & Undergraduate Supervision");
       formData.append(
         "details",

@@ -5,6 +5,7 @@ import Performance from "../component/Performance";
 import Faculties from "../component/Faculties";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { FaUser, FaCamera } from "react-icons/fa";
 
 export default function Admin() {
   const [faculties, setFaculties] = useState([]);
@@ -14,9 +15,15 @@ export default function Admin() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  // Add new state variables for profile management
+  const [adminName, setAdminName] = useState("");
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = React.useRef(null);
 
   useEffect(() => {
     fetchFaculties();
+    fetchAdminProfile();
   }, []);
 
   const fetchFaculties = async () => {
@@ -31,6 +38,28 @@ export default function Admin() {
       }
     } catch (error) {
       toast.error(error.message);
+    }
+  };
+
+  // Add function to fetch admin profile
+  const fetchAdminProfile = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:4000/api/user/profile",
+        { withCredentials: true }
+      );
+      if (data.success) {
+        setAdminName(data.user.name);
+        if (data.user.profilePicture) {
+          setImagePreview(
+            `http://localhost:4000/uploads/profile/${data.user.profilePicture}`
+          );
+        }
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch profile information");
     }
   };
 
@@ -164,39 +193,114 @@ export default function Admin() {
     }
   };
 
-  const handleChangePassword = async () => {
-    if (newPassword !== confirmPassword) {
-      toast.error("New password and confirm password do not match.");
+  // Add handlers for profile picture upload
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        toast.error("File size should not exceed 5MB");
+        return;
+      }
+
+      if (!file.type.match("image.*")) {
+        toast.error("Please select an image file");
+        return;
+      }
+
+      setProfilePicture(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  // Update handler for profile update
+  const handleProfileUpdate = async () => {
+    if (!adminName.trim()) {
+      toast.error("Name cannot be empty");
       return;
     }
 
     try {
+      const formData = new FormData();
+      formData.append("name", adminName);
+
+      if (profilePicture) {
+        formData.append("profilePicture", profilePicture);
+      }
+
       const { data } = await axios.put(
-        "http://localhost:4000/api/user/change-password",
-        { currentPassword, newPassword },
-        { withCredentials: true }
+        "http://localhost:4000/api/user/profile",
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
       if (data.success) {
-        toast.success("Password changed successfully.");
-        setShowChangePasswordModal(false);
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
+        toast.success("Profile updated successfully");
+        fetchAdminProfile(); // Refresh profile data
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error("Failed to update profile");
     }
+  };
+
+  // Update handleChangePassword to include profile update
+  const handleUpdateProfile = async () => {
+    // Update profile information
+    await handleProfileUpdate();
+
+    // If password fields are filled, also update password
+    if (currentPassword && newPassword && confirmPassword) {
+      if (newPassword !== confirmPassword) {
+        toast.error("New password and confirm password do not match.");
+        return;
+      }
+
+      try {
+        const { data } = await axios.put(
+          "http://localhost:4000/api/user/change-password",
+          { currentPassword, newPassword },
+          { withCredentials: true }
+        );
+
+        if (data.success) {
+          toast.success("Password changed successfully.");
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error("Failed to change password");
+      }
+    }
+
+    // Close modal when done
+    setShowChangePasswordModal(false);
   };
 
   return (
     <div className="flex">
       <Navbar />
-      <div className="flex w-full pt-23">
-        {/*Added mt-2*/}
-        <div className="w-1/6 h-screen bg-gray-200 p-4 mt-2">
+      <div className="flex w-full pt-25">
+        <div className="w-1/6 h-screen bg-gray-200 p-4">
           <h2 className="text-2xl font-bold mb-4">Admin Panel</h2>
           <ul className="space-y-4">
             <li>
@@ -252,11 +356,60 @@ export default function Admin() {
         </div>
       </div>
 
-      {/* Change Password Modal */}
+      {/* Updated Profile/Password Modal */}
       {showChangePasswordModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-lg w-1/3">
-            <h2 className="text-2xl font-bold mb-4">Change Password</h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+          <div className="bg-white p-6 rounded shadow-lg w-2/5 max-h-[90%] overflow-y-auto mt-[20px]">
+            <h2 className="text-2xl font-bold mb-4 mt-5">Update Profile</h2>
+
+            {/* Profile Picture Section */}
+            <div className="flex flex-col items-center mb-6">
+              <div
+                className="w-32 h-32 rounded-lg bg-gray-200 flex items-center justify-center relative overflow-hidden cursor-pointer border-4 border-teal-500"
+                onClick={triggerFileInput}
+              >
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <FaUser size={50} className="text-gray-400" />
+                )}
+                <div className="absolute bottom-0 right-0 left-0 bg-black bg-opacity-50 py-1 text-center">
+                  <FaCamera className="text-white mx-auto" />
+                </div>
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleProfilePictureChange}
+                className="hidden"
+                accept="image/*"
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                Click to change photo
+              </p>
+            </div>
+
+            {/* Name Field */}
+            <div className="mb-4">
+              <label className="block font-bold mb-2">Name</label>
+              <input
+                type="text"
+                value={adminName}
+                onChange={(e) => setAdminName(e.target.value)}
+                className="p-2 border border-gray-300 rounded w-full"
+                placeholder="Your name"
+              />
+            </div>
+
+            <h3 className="text-xl font-bold mt-6 mb-3 border-t pt-4">
+              Change Password (Optional)
+            </h3>
+
+            {/* Password Fields */}
             <div className="mb-4">
               <label className="block font-bold mb-2">Current Password</label>
               <input
@@ -295,10 +448,10 @@ export default function Admin() {
                 Cancel
               </button>
               <button
-                onClick={handleChangePassword}
+                onClick={handleUpdateProfile}
                 className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
               >
-                Change Password
+                Update Profile
               </button>
             </div>
           </div>

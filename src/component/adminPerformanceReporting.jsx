@@ -61,14 +61,14 @@ const AdminPerformanceReporting = ({ staffId }) => {
   };
 
   const calculateCategoryProgress = (category) => {
-    if (!reportData || !category) return 0;
+    if (!reportData || !category) return { count: 0, total: 50 };
 
-    const totalQuantity = category.quantity || 0;
-    const matchedQuantity = reportData.publications.filter(
+    const matchedCount = reportData.publications.filter(
       (entry) => entry.area === category.name
     ).length;
 
-    return totalQuantity > 0 ? (matchedQuantity / totalQuantity) * 100 : 0;
+    // Always use 50 as the total regardless of category settings
+    return { count: matchedCount, total: 50 };
   };
 
   const calculateCategoryCounts = () => {
@@ -142,33 +142,38 @@ const AdminPerformanceReporting = ({ staffId }) => {
             </table>
           </section>
 
-          {/* Area Progress */}
+          {/* Area Progress - Modified to show counts instead of percentages */}
           <section className="bg-white p-6 rounded-lg shadow-lg">
             <h3 className="text-2xl font-semibold mb-4 text-gray-700">
               Area Progress
             </h3>
-            {categories.map((category) => (
-              <div key={category._id} className="mb-4">
-                <h4 className="text-xl font-semibold mb-2 text-gray-700">
-                  {category.name}
-                </h4>
-                <div className="w-full bg-gray-200 rounded-full h-4 relative">
-                  <div
-                    className={`${
-                      calculateCategoryProgress(category) === 100
-                        ? "bg-green-500"
-                        : "bg-teal-500"
-                    } h-4 rounded-full`}
-                    style={{
-                      width: `${calculateCategoryProgress(category)}%`,
-                    }}
-                  ></div>
-                  <span className="absolute inset-0 flex items-center justify-center text-black font-bold">
-                    {calculateCategoryProgress(category).toFixed(2)}%
-                  </span>
+            {categories.map((category) => {
+              const { count, total } = calculateCategoryProgress(category);
+              const progressWidth = Math.min((count / total) * 100, 100); // Cap at 100%
+
+              return (
+                <div key={category._id} className="mb-6">
+                  <div className="flex justify-between mb-2">
+                    <h4 className="text-xl font-semibold text-gray-700">
+                      {category.name}
+                    </h4>
+                    <span className="font-bold text-gray-700">
+                      {count} / 50 entries
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-6 relative">
+                    <div
+                      className={`${
+                        count >= 50 ? "bg-green-500" : "bg-teal-500"
+                      } h-6 rounded-full transition-all duration-500`}
+                      style={{
+                        width: `${progressWidth}%`,
+                      }}
+                    ></div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </section>
 
           {/* Overall Performance Summary */}
