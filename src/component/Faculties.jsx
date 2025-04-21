@@ -365,7 +365,7 @@ const Faculties = ({
                 {faculty.departments.map((dept) => (
                   <li
                     key={dept._id}
-                    className="p-2 border border-gray-300 rounded"
+                    className="p-2 border border-gray-500 rounded"
                   >
                     <div className="flex justify-between items-center">
                       <span className="font-bold">{dept.name}</span>

@@ -118,10 +118,10 @@ const PerformanceReporting = ({ staffId, reportData: initialReportData }) => {
         <p className="text-center text-gray-500">Loading report...</p>
       ) : reportData ? (
         <div className="space-y-6">
-          {/* Summary */}
+          {/* Publications Summary */}
           <section className="bg-white p-6 rounded-lg shadow-lg">
             <h3 className="text-2xl font-semibold mb-4 text-gray-700">
-              Summary
+              Publications Summary
             </h3>
             <div className="flex justify-between items-center mb-4">
               <p className="text-gray-600">

@@ -213,6 +213,31 @@ const PerformanceArea = () => {
         );
       }
 
+      // Special formatting for Postgraduate Supervision - matching Teaching & Undergraduate style
+      if (area === "Postgraduate Supervision") {
+        return (
+          <div className="pl-2">
+            <p className="font-medium text-blue-600 mb-2">
+              Postgraduate Supervision
+            </p>
+            <div className="bg-gray-50 p-3 rounded border border-gray-200">
+              {parsedDetails &&
+                Object.entries(parsedDetails).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className="mb-2 pb-2 border-b border-gray-100 last:border-0"
+                  >
+                    <span className="font-semibold text-gray-700 capitalize">
+                      {key.replace(/([A-Z])/g, " $1").trim()}:
+                    </span>{" "}
+                    <span className="text-gray-800">{value}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        );
+      }
+
       // Default formatting for other entry types
       return (
         <ul className="list-disc pl-5 space-y-1">
@@ -331,7 +356,7 @@ const PerformanceArea = () => {
   };
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Performance Area Management</h2>
         <div className="flex items-center">

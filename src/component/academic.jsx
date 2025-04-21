@@ -328,7 +328,7 @@ const AcademicStaff = ({ onDepartmentChange }) => {
             onClick={() => setShowStaffModal(true)}
             className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer flex items-center"
           >
-            <FaPlus className="mr-2" />Add Staff
+            <FaPlus className="mr-2" /> Add Staff
           </button>
         </div>
 
@@ -434,7 +434,7 @@ const AcademicStaff = ({ onDepartmentChange }) => {
               <h2 className="text-2xl font-bold">
                 Profile of {selectedStaff.name}
               </h2>
-              <div className="w-24 h-24 rounded-lg bg-gray-200 overflow-hidden flex items-center justify-center border-4 border-gray-300">
+              <div className="w-40 h-40 rounded-lg bg-gray-200 overflow-hidden absolute top-[250px] right-[270px] items-center justify-center border-4 border-gray-300">
                 {selectedStaff.profilePicture ? (
                   <img
                     src={`http://localhost:4000/uploads/profile/${selectedStaff.profilePicture}`}
@@ -442,7 +442,7 @@ const AcademicStaff = ({ onDepartmentChange }) => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <FaUser size={50} className="text-gray-400" />
+                  <FaUser size={150} className="text-gray-400" />
                 )}
               </div>
             </div>

@@ -8,6 +8,10 @@ export const AppContent = createContext();
 export const AppContextProvider = ({ children }) => {
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [profileImageTimestamp, setProfileImageTimestamp] = useState(
+    Date.now()
+  );
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const getUserData = async () => {
@@ -64,6 +68,17 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
+  const updateProfileImage = (imageFilename) => {
+    if (imageFilename) {
+      setProfileImageUrl(
+        `http://localhost:4000/uploads/profile/${imageFilename}`
+      );
+    } else {
+      setProfileImageUrl(null);
+    }
+    setProfileImageTimestamp(Date.now());
+  };
+
   useEffect(() => {
     if (isLoggedin) {
       getUserData();
@@ -89,6 +104,9 @@ export const AppContextProvider = ({ children }) => {
         getOAuthUserData,
         logout,
         backendUrl,
+        profileImageUrl,
+        updateProfileImage,
+        profileImageTimestamp,
       }}
     >
       {children}

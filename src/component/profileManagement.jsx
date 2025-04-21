@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaCamera } from "react-icons/fa";
+import { AppContent } from "../context/AppContext";
 
 const ProfileManagement = () => {
+  const { updateProfileImage } = useContext(AppContent);
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -137,6 +139,12 @@ const ProfileManagement = () => {
 
       if (data.success) {
         toast.success("Profile updated successfully");
+
+        // Update profile image in context if a new image was uploaded
+        if (profilePictureFile) {
+          updateProfileImage(data.user.profilePicture);
+        }
+
         setProfilePictureFile(null); // Reset file input after successful upload
       } else {
         toast.error(data.message);

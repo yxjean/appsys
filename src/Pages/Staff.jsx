@@ -242,15 +242,15 @@ export default function Staff() {
             )}
           </ul>
         </div>
-        <div className="w-5/6 p-4">
+        <div className="w-5/6 h-full p-4">
           {selectedSection === "Profile Management" && <ProfileManagement />}
           {selectedSection === "Performance Reporting" && (
             <PerformanceReporting />
           )}
           {selectedSection === "Performance Area" && <PerformanceArea />}
           {selectedSection === "View All Staff" && (
-            <div>
-              <div className="flex justify-between items-center mt-6 mb-6">
+            <div className="bg-white p-6 rounded shadow-lg h-screen overflow-auto">
+              <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Viewable Staff</h2>
                 <button
                   onClick={handleShowSummary}
@@ -312,7 +312,7 @@ export default function Staff() {
               <h2 className="text-2xl font-bold">
                 Profile of {selectedStaffProfile.name}
               </h2>
-              <div className="w-24 h-24 rounded-lg bg-gray-200 overflow-hidden flex items-center justify-center border-4 border-gray-300">
+              <div className="w-30 h-30 rounded-lg bg-gray-200 overflow-hidden absolute top-[320px] right-[500px] items-center justify-center border-4 border-gray-300">
                 {selectedStaffProfile.profilePicture ? (
                   <img
                     src={`http://localhost:4000/uploads/profile/${selectedStaffProfile.profilePicture}`}
@@ -320,7 +320,7 @@ export default function Staff() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <FaUser size={50} className="text-gray-400" />
+                  <FaUser size={150} className="text-gray-400" />
                 )}
               </div>
             </div>
@@ -483,7 +483,7 @@ export default function Staff() {
               <button
                 onClick={() => {
                   setViewProfile(null);
-                  setShowMoreInfo(false); // Reset more info state when closing
+                  setShowMoreInfo(false);
                 }}
                 className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer"
               >

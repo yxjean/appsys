@@ -8,9 +8,15 @@ import { FaUser } from "react-icons/fa";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { userData, backendUrl, setUserData, setIsLoggedin } =
-    useContext(AppContent);
-  const [profileImage, setProfileImage] = useState(null);
+  const {
+    userData,
+    backendUrl,
+    setUserData,
+    setIsLoggedin,
+    profileImageUrl,
+    updateProfileImage,
+    profileImageTimestamp,
+  } = useContext(AppContent);
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
@@ -23,9 +29,7 @@ const Navbar = () => {
             { withCredentials: true }
           );
           if (data.success && data.user.profilePicture) {
-            setProfileImage(
-              `http://localhost:4000/uploads/profile/${data.user.profilePicture}`
-            );
+            updateProfileImage(data.user.profilePicture);
           }
         } catch (error) {
           console.error("Error fetching profile:", error);
@@ -43,6 +47,7 @@ const Navbar = () => {
       if (data.success) {
         setIsLoggedin(false);
         setUserData(null);
+        updateProfileImage(null); // Clear profile image
         navigate("/");
       } else {
         toast.error(data.message);
@@ -70,9 +75,9 @@ const Navbar = () => {
             onClick={() => setShowDropdown(!showDropdown)}
           >
             <div className="w-10 h-10 flex justify-center items-center rounded-full bg-[#ff8800] text-white text-xl overflow-hidden">
-              {profileImage ? (
+              {profileImageUrl ? (
                 <img
-                  src={profileImage}
+                  src={`${profileImageUrl}?t=${profileImageTimestamp}`} // Add timestamp to prevent caching
                   alt={userData.name}
                   className="w-full h-full object-cover"
                 />

@@ -49,7 +49,7 @@ const Research = ({ onEntryAdded = () => {} }) => {
       );
 
       if (data.success) {
-        onEntryAdded(); // Notify parent to refresh entries
+        onEntryAdded();
       } else {
         console.error(data.message);
       }

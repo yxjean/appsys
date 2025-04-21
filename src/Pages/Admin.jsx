@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../component/navbar";
 import AcademicStaff from "../component/academic";
 import Performance from "../component/Performance";
@@ -6,6 +6,7 @@ import Faculties from "../component/Faculties";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FaUser, FaCamera } from "react-icons/fa";
+import { AppContent } from "../context/AppContext";
 
 export default function Admin() {
   const [faculties, setFaculties] = useState([]);
@@ -20,6 +21,7 @@ export default function Admin() {
   const [profilePicture, setProfilePicture] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = React.useRef(null);
+  const { updateProfileImage } = useContext(AppContent);
 
   useEffect(() => {
     fetchFaculties();
@@ -251,6 +253,12 @@ export default function Admin() {
 
       if (data.success) {
         toast.success("Profile updated successfully");
+
+        // Update the profile image in context if a new one was uploaded
+        if (profilePicture) {
+          updateProfileImage(data.user.profilePicture);
+        }
+
         fetchAdminProfile(); // Refresh profile data
       } else {
         toast.error(data.message);
@@ -260,12 +268,9 @@ export default function Admin() {
     }
   };
 
-  // Update handleChangePassword to include profile update
   const handleUpdateProfile = async () => {
-    // Update profile information
     await handleProfileUpdate();
 
-    // If password fields are filled, also update password
     if (currentPassword && newPassword && confirmPassword) {
       if (newPassword !== confirmPassword) {
         toast.error("New password and confirm password do not match.");
