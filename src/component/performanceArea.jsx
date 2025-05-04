@@ -238,6 +238,93 @@ const PerformanceArea = () => {
         );
       }
 
+      // Special formatting for VASI
+      if (area === "VASI") {
+        return (
+          <div className="pl-2">
+            <div className="bg-gray-50 p-3 rounded border border-gray-200">
+              <div className="mb-2 pb-2 border-b border-gray-100">
+                <span className="font-semibold text-gray-700">Description:</span>{" "}
+                <span className="text-gray-800">{parsedDetails.description}</span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      //// Special formatting for Research
+      if (area === "Research") {
+        return (
+          <div className="pl-2">
+            <div className="bg-gray-50 p-3 rounded border border-gray-200">
+              {Object.entries(parsedDetails).map(([key, value]) => (
+                <div 
+                  key={key}
+                  className="mb-2 pb-2 border-b border-gray-100 last:border-0"
+                >
+                  <span className="font-semibold text-gray-700 capitalize">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </span>{" "}
+                  <span className="text-gray-800">{value}</span>
+                </div>
+              ))}
+
+              {/* Add file link if document exists */}
+              {entry.document && (
+                <div className="mt-3 pt-2 border-t border-gray-200">
+                  <span className="font-semibold text-gray-700">Document:</span>{" "}
+                  <a
+                    href={`http://localhost:4000/uploads/${entry.document}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    View Document
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+
+      //// Special formatting for Consultancy
+      if (area === "Consultancy") {
+        return (
+          <div className="pl-2">
+            <div className="bg-gray-50 p-3 rounded border border-gray-200">
+              {Object.entries(parsedDetails).map(([key, value]) => (
+                <div 
+                  key={key}
+                  className="mb-2 pb-2 border-b border-gray-100 last:border-0"
+                >
+                  <span className="font-semibold text-gray-700 capitalize">
+                    {key.replace(/([A-Z])/g, " $1").trim()}:
+                  </span>{" "}
+                  <span className="text-gray-800">{value}</span>
+                </div>
+              ))}
+
+              {/* Add file link if document exists */}
+              {entry.document && (
+                <div className="mt-3 pt-2 border-t border-gray-200">
+                  <span className="font-semibold text-gray-700">Document:</span>{" "}
+                  <a
+                    href={`http://localhost:4000/uploads/${entry.document}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    View Document
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
       // Default formatting for other entry types
       return (
         <ul className="list-disc pl-5 space-y-1">
@@ -274,7 +361,6 @@ const PerformanceArea = () => {
     }
   };
 
-  // Modify the renderAdministrativeServiceEntries function to use a 2-column layout
   const renderAdministrativeServiceEntries = (entries) => {
     if (!entries || entries.length === 0) return null;
 
@@ -356,7 +442,7 @@ const PerformanceArea = () => {
   };
 
   return (
-    <div className="w-full p-6">
+    <div className="w-full p-6 flex flex-col min-h-screen">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Performance Area Management</h2>
         <div className="flex items-center">
@@ -402,7 +488,8 @@ const PerformanceArea = () => {
       )}
       {selectedCategory === "Administrative Service" &&
         renderAdministrativeServiceEntries(entries)}
-      <div className="space-y-4">
+
+      <div className="space-y-4 flex-grow">
         {filteredEntries.map((entry) => (
           <div
             key={entry._id}
@@ -420,11 +507,26 @@ const PerformanceArea = () => {
             </div>
           </div>
         ))}
+
+        {/* Empty state message when no entries are found */}
+        {filteredEntries.length === 0 && selectedCategory && (
+          <div className="text-center py-10 text-gray-500">
+            No entries found for {selectedCategory}. Click "Add Entry" to create
+            one.
+          </div>
+        )}
+
+        {/* Empty state when no category is selected */}
+        {!selectedCategory && (
+          <div className="text-center py-10 text-gray-500">
+            Please select a category to view or add entries.
+          </div>
+        )}
       </div>
 
       {showEntryModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-1/2 overflow-y-auto">
+          <div className="bg-white p-6 rounded shadow-lg w-1/2 overflow-y-auto max-h-[90vh]">
             <h2 className="text-2xl font-bold mb-4">Add New Entry</h2>
             {renderForm()}
             <div className="flex justify-end mt-4">

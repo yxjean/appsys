@@ -203,7 +203,7 @@ export default function Staff() {
     <div className="flex">
       <Navbar />
       <div className="flex w-full pt-20">
-        <div className="w-1/6 h-screen bg-gray-200 p-4 mt-5">
+        <div className="w-1/6 min-h-screen bg-gray-200 p-4 mt-5">
           <h2 className="text-2xl font-bold mb-4">Staff Panel</h2>
           <ul className="space-y-4">
             <li>
@@ -242,7 +242,7 @@ export default function Staff() {
             )}
           </ul>
         </div>
-        <div className="w-5/6 h-full p-4">
+        <div className="w-5/6 h-full min-h-screen p-4">
           {selectedSection === "Profile Management" && <ProfileManagement />}
           {selectedSection === "Performance Reporting" && (
             <PerformanceReporting />
@@ -312,6 +312,7 @@ export default function Staff() {
               <h2 className="text-2xl font-bold">
                 Profile of {selectedStaffProfile.name}
               </h2>
+              {/* Profile Picture */}
               <div className="w-30 h-30 rounded-lg bg-gray-200 overflow-hidden absolute top-[320px] right-[500px] items-center justify-center border-4 border-gray-300">
                 {selectedStaffProfile.profilePicture ? (
                   <img
@@ -320,7 +321,7 @@ export default function Staff() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <FaUser size={150} className="text-gray-400" />
+                  <FaUser size={110} className="text-gray-400" />
                 )}
               </div>
             </div>
@@ -494,9 +495,8 @@ export default function Staff() {
         </div>
       )}
       {viewReport && selectedStaff && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 mt-20">
           <div className="bg-white p-6 rounded shadow-lg w-3/4 h-[90%] overflow-auto">
-            <h2 className="text-2xl font-bold mb-4">Performance Report</h2>
             <AdminPerformanceReporting staffId={selectedStaff} />
             <div className="flex justify-end">
               <button

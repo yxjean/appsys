@@ -153,6 +153,18 @@ const Faculties = ({
     }
   };
 
+  const handleSelectAllStaff = () => {
+    if (selectedStaffIds.length === filteredStaff.length) {
+      // If all are already selected, unselect all
+      setSelectedStaffIds([]);
+    } else {
+      // Select all staff IDs
+      const allStaffIds = filteredStaff.map((staff) => staff._id);
+      setSelectedStaffIds(allStaffIds);
+    }
+  };
+  
+
   const addFaculty = async (facultyName) => {
     try {
       const { data } = await axios.post(
@@ -519,8 +531,21 @@ const Faculties = ({
                 placeholder="Enter role here..."
               />
             </div>
-            <h3 className="text-xl font-bold mb-4">Select Viewable Staff</h3>
-
+            
+            {/* Select All Button */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold">Select Viewable Staff</h3>
+              <button
+                onClick={handleSelectAllStaff}
+                className="py-2 px-2 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
+              >
+                {selectedStaffIds.length === filteredStaff.length
+                  ? "Unselect All"
+                  : "Select All"}
+              </button>
+            </div>
+      
+            {/* Search Bar */}
             <div className="relative mb-4">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"></div>
               <input
@@ -532,6 +557,7 @@ const Faculties = ({
               />
             </div>
 
+            {/* Staff List */}
             <div className="max-h-60 overflow-y-auto">
               <ul className="space-y-2">
                 {filteredStaff.map((staffMember) => (

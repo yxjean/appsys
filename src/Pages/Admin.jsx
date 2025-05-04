@@ -305,7 +305,7 @@ export default function Admin() {
     <div className="flex">
       <Navbar />
       <div className="flex w-full pt-25">
-        <div className="w-1/6 h-screen bg-gray-200 p-4">
+        <div className="w-1/6 min-h-screen bg-gray-200 p-4">
           <h2 className="text-2xl font-bold mb-4">Admin Panel</h2>
           <ul className="space-y-4">
             <li>
@@ -342,7 +342,7 @@ export default function Admin() {
             </li>
           </ul>
         </div>
-        <div className="w-5/6 p-4">
+        <div className="w-5/6 min-h-screen p-4">
           {selectedSection === "Faculties" && (
             <Faculties
               faculties={faculties}
@@ -363,8 +363,8 @@ export default function Admin() {
 
       {/* Updated Profile/Password Modal */}
       {showChangePasswordModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
-          <div className="bg-white p-6 rounded shadow-lg w-2/5 max-h-[90%] overflow-y-auto mt-[20px]">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto mt-20">
+          <div className="bg-white px-6 py-4 rounded shadow-lg w-2/5 max-h-[90%] overflow-y-auto mt-[20px]">
             <h2 className="text-2xl font-bold mb-4 mt-5">Update Profile</h2>
 
             {/* Profile Picture Section */}

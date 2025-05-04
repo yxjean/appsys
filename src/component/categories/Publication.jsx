@@ -131,13 +131,21 @@ const Publication = ({ onEntryAdded }) => {
         )}
 
         {/* Upload File */}
-        <div>
+        <div className="mb-4">
           <label className="block font-bold mb-2">Upload File</label>
-          <input
-            type="file"
-            onChange={handleFileChange}
-            className="p-2 border border-gray-300 rounded w-full"
-          />
+          <div className="relative">
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="block w-full text-base text-gray-700
+                         file:mr-4 file:py-2 file:px-4
+                         file:rounded file:border-0
+                         file:text-base file:font-semibold
+                         file:bg-blue-50 file:text-blue-700
+                         hover:file:bg-blue-100
+                         border border-gray-300 rounded"
+            />
+          </div>
         </div>
 
         {/* Submit Button */}

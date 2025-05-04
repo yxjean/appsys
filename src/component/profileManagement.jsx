@@ -32,7 +32,7 @@ const ProfileManagement = () => {
   const navigate = useNavigate();
 
   // Qualification options
-  const qualificationOptions = ["Bachelor", "Master", "Doctor"];
+  const qualificationOptions = ["Bachelor", "Master", "PhD"];
 
   useEffect(() => {
     fetchUserProfile();
@@ -201,7 +201,7 @@ const ProfileManagement = () => {
   };
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full p-6">
       <h2 className="text-2xl font-bold">Profile Management</h2>
       <div className="flex flex-col items-center my-6">
         <div
@@ -320,13 +320,7 @@ const ProfileManagement = () => {
           >
             Update Profile
           </button>
-          <button
-            type="button"
-            onClick={deleteUserProfile}
-            className="py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
-          >
-            Delete Profile
-          </button>
+          {/* Remove 'delete profile' button */}
         </div>
       </form>
       <h2 className="text-2xl font-bold mt-8 mb-4">Change Password</h2>

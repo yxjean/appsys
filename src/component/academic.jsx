@@ -24,6 +24,9 @@ const AcademicStaff = ({ onDepartmentChange }) => {
   const [faculties, setFaculties] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState("");
   const [filteredDepartments, setFilteredDepartments] = useState([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [staffIdToRemove, setStaffIdToRemove] = useState(null);
+
 
   const [searchType, setSearchType] = useState("name");
   const searchRef = useRef(null);
@@ -298,6 +301,10 @@ const AcademicStaff = ({ onDepartmentChange }) => {
     }
   };
 
+  useEffect(() => {
+    setShowMoreInfo(false); // Reset to false when selectedStaff changes
+  }, [selectedStaff]);
+
   const fetchStaffReport = async (id) => {
     if (!id) {
       toast.error("Invalid staff ID");
@@ -317,6 +324,12 @@ const AcademicStaff = ({ onDepartmentChange }) => {
     } catch (error) {
       toast.error(error.message);
     }
+  };
+
+  const confirmRemoval = () => {
+    deleteStaff(staffIdToRemove);
+    setShowConfirmModal(false);
+    setStaffIdToRemove(null);
   };
 
   return (
@@ -409,7 +422,10 @@ const AcademicStaff = ({ onDepartmentChange }) => {
                       View Profile
                     </button>
                     <button
-                      onClick={() => deleteStaff(staffMember._id)}
+                      onClick={() => {
+                        setStaffIdToRemove(staffMember._id);
+                        setShowConfirmModal(true);
+                      }}
                       className="p-2 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
                       title="Remove Staff"
                     >
@@ -624,10 +640,35 @@ const AcademicStaff = ({ onDepartmentChange }) => {
         </div>
       )}
 
+      {showConfirmModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-lg w-1/3">
+            <h2 className="text-2xl font-bold mb-4">Confirm Removal</h2>
+            <p className="mb-6">
+              Are you sure you want to remove this staff? This action cannot be undone.
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRemoval}
+                className="py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {showReportModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto mt-20">
           <div className="bg-white p-6 rounded shadow-lg w-3/4 h-[90%] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">Performance Report</h2>
             <AdminPerformanceReporting staffId={selectedStaff._id} />
             <div className="flex justify-end mt-4">
               <button
