@@ -173,6 +173,7 @@ export default function Staff() {
 
   const handleShowSummary = () => {
     setShowStaffSummary(true);
+    setSortOrder("alphabetical"); // Add set alpahbetical by default
     if (staffEntriesData.length === 0) {
       fetchStaffWithEntries();
     }
@@ -276,7 +277,7 @@ export default function Staff() {
 
               <ul className="space-y-2">
                 {filteredViewableStaff.length > 0 ? (
-                  filteredViewableStaff.map((staffMember) => (
+                  filteredViewableStaff.sort((a, b) => a.name.localeCompare(b.name)).map((staffMember) => (
                     <li
                       key={staffMember._id}
                       className="p-2 border border-gray-300 rounded flex justify-between items-center"
