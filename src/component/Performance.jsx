@@ -64,14 +64,18 @@ const PerformanceManager = () => {
             className="border border-gray-300 rounded p-4 flex justify-between items-center"
           >
             <span className="font-bold">{category.name}</span>
-            <input
-              type="number"
-              value={category.quantity}
-              onChange={(e) =>
-                handleQuantityChange(category._id, e.target.value)
-              }
-              className="p-2 border border-gray-300 rounded w-20"
-            />
+            <div className="flex items-center border border-gray-300 rounded px-2">
+              <input
+                type="number"
+                value={category.quantity}
+                onChange={(e) =>
+                  handleQuantityChange(category._id, e.target.value)
+                }
+                className="p-2 w-16 border-none focus:outline-none"
+              />
+              <span className="text-gray-600">%</span>
+            </div>
+              
           </div>
         ))}
       </div>

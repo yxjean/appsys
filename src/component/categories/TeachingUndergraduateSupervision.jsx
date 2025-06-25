@@ -130,12 +130,33 @@ const TeachingUndergraduateSupervision = ({ onEntryAdded = () => {} }) => {
               </div>
               <div>
                 <label className="block font-medium text-gray-700 mb-2">
-                  Student Evaluation Rating
+                  Student Evaluation Rating (0 - 5)
                 </label>
                 <input
                   type="number"
+                  min="0.0"
+                  max="5.0"
+                  step="0.1"
                   value={studentEvaluationRating}
-                  onChange={(e) => setStudentEvaluationRating(e.target.value)}
+                  onChange={(e) => {
+                    const input = e.target.value;
+                    if (input === "") {
+                      setStudentEvaluationRating("");
+                      return;
+                    }
+                  
+                    const value = parseFloat(input);
+                  
+                    // Regex: allow numbers with up to 1 decimal place
+                    const validFormat = /^\d{1,2}(\.\d)?$/;
+                    if (
+                      value >= 0 &&
+                      value <= 5 &&
+                      validFormat.test(input)
+                    ) {
+                      setStudentEvaluationRating(input);
+                    }
+                  }}
                   className="p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-teal-500"
                   required
                 />

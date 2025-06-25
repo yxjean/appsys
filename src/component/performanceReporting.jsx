@@ -154,7 +154,8 @@ const PerformanceReporting = ({ staffId, reportData: initialReportData }) => {
                     <td className="border p-2">{entry.title}</td>
                     <td className="border p-2">{entry.area}</td>
                     <td className="border p-2">
-                      {new Date(entry.date).toLocaleDateString()}
+                      {new Date(entry.date).toLocaleDateString('en-GB')} 
+                      {/* format = day/month/year */}
                     </td>
                   </tr>
                 ))}

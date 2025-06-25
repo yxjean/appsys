@@ -113,7 +113,7 @@ const AdminPerformanceReporting = ({ staffId }) => {
               Summary
             </h3>
             <p className="text-gray-600">
-              <strong>Total Publications:</strong>{" "}
+              <strong>Total Entries:</strong>{" "}
               {reportData.publications.length}
             </p>
             <table className="w-full mt-4 border-collapse border border-gray-200">
@@ -131,7 +131,8 @@ const AdminPerformanceReporting = ({ staffId }) => {
                     <td className="border p-2">{pub.title}</td>
                     <td className="border p-2">{pub.area}</td>
                     <td className="border p-2">
-                      {new Date(pub.date).toLocaleDateString()}
+                      {new Date(pub.date).toLocaleDateString('en-GB')}
+                      {/* format = day/month/year */}
                     </td>
                     <td className="border p-2">
                       {pub.grade ? "Completed" : "Under Supervised"}

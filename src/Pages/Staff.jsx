@@ -309,15 +309,77 @@ export default function Staff() {
       {selectedStaffProfile && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow-lg w-1/2">
-            <div className="flex justify-between items-start mb-6">
-              <h2 className="text-2xl font-bold">
-                Profile of {selectedStaffProfile.name}
-              </h2>
-              {/* Profile Picture */}
-              <div className="w-30 h-30 rounded-lg bg-gray-200 overflow-hidden absolute top-[320px] right-[500px] items-center justify-center border-4 border-gray-300">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              {/* Left side: Info */}
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-6">
+                  <h2 className="text-2xl font-bold">
+                    Profile of {selectedStaffProfile.name}
+                  </h2>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold">Email</h3>
+                  <p>{selectedStaffProfile.email}</p>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold">Faculty</h3>
+                  <p>
+                    {selectedStaffProfile.faculty
+                      ? selectedStaffProfile.faculty.name
+                      : "Not assigned"}
+                  </p>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold">Department</h3>
+                  <p>{selectedStaffProfile.department.name}</p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowMoreInfo(!showMoreInfo)}
+                    className="py-2 px-4 bg-teal-500  text-white rounded hover:bg-teal-600 cursor-pointer mb-4"
+                  >
+                    {showMoreInfo ? "Hide Information" :  "More Information"}
+                  </button>
+                  {showMoreInfo && (
+                    <div className="mt-2 mb-4">
+                      <h3 className="text-xl  font-bold">JoInformation</h3>
+                      <p>
+                        <strong>Designation:</strong>{" "}
+                        {selectedStaffProfile.jobInfo &&
+                        selectedStaffProfile.jobInfo.length > 0
+                          ? selectedStaffProfile.jobInfo[0].designation
+                          : "Not specified"}
+                      </p>
+                      <p>
+                        <strong>Contact Number:</strong>{" "}
+                        {selectedStaffProfile.jobInfo &&
+                        selectedStaffProfile.jobInfo.length > 0
+                          ? selectedStaffProfile.jobInfo[0].contactNumber
+                          : "Not specified"}
+                      </p>
+                      <p>
+                        <strong>Qualifications:</strong>{" "}
+                        {selectedStaffProfile.jobInfo &&
+                        selectedStaffProfile.jobInfo.length > 0
+                          ? selectedStaffProfile.jobInfo[0].qualifications
+                          : "Not specified"}
+                      </p>
+                      <p>
+                        <strong>Area of Expertise:</strong> {""}
+                        {selectedStaffProfile.jobInfo &&
+                        selectedStaffProfile.jobInfo.length > 0
+                          ? selectedStaffProfile.jobInfo[0].areaOfExpertise
+                          : "Not specified"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* Right side: Image */}
+              <div className="w-30 h-30 rounded-lg  bg-gray-2overflow-hidden border-4 border-gray-300">
                 {selectedStaffProfile.profilePicture ? (
                   <img
-                    src={`http://localhost:4000/uploads/profile/${selectedStaffProfile.profilePicture}`}
+                  src={`http://localhost:4000/uploads/profile/${selectedStaffProfile.profilePicture}`}
                     alt={selectedStaffProfile.name}
                     className="w-full h-full object-cover"
                   />
@@ -325,63 +387,6 @@ export default function Staff() {
                   <FaUser size={110} className="text-gray-400" />
                 )}
               </div>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Email</h3>
-              <p>{selectedStaffProfile.email}</p>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Faculty</h3>
-              <p>
-                {selectedStaffProfile.faculty
-                  ? selectedStaffProfile.faculty.name
-                  : "Not assigned"}
-              </p>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Department</h3>
-              <p>{selectedStaffProfile.department.name}</p>
-            </div>
-            <div className="mt-4">
-              <button
-                onClick={() => setShowMoreInfo(!showMoreInfo)}
-                className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer mb-4"
-              >
-                {showMoreInfo ? "Hide Information" : "More Information"}
-              </button>
-              {showMoreInfo && (
-                <div className="mt-2 mb-4">
-                  <h3 className="text-xl font-bold">Job Information</h3>
-                  <p>
-                    <strong>Designation:</strong>{" "}
-                    {selectedStaffProfile.jobInfo &&
-                    selectedStaffProfile.jobInfo.length > 0
-                      ? selectedStaffProfile.jobInfo[0].designation
-                      : "Not specified"}
-                  </p>
-                  <p>
-                    <strong>Contact Number:</strong>{" "}
-                    {selectedStaffProfile.jobInfo &&
-                    selectedStaffProfile.jobInfo.length > 0
-                      ? selectedStaffProfile.jobInfo[0].contactNumber
-                      : "Not specified"}
-                  </p>
-                  <p>
-                    <strong>Qualifications:</strong>{" "}
-                    {selectedStaffProfile.jobInfo &&
-                    selectedStaffProfile.jobInfo.length > 0
-                      ? selectedStaffProfile.jobInfo[0].qualifications
-                      : "Not specified"}
-                  </p>
-                  <p>
-                    <strong>Area of Expertise:</strong>{" "}
-                    {selectedStaffProfile.jobInfo &&
-                    selectedStaffProfile.jobInfo.length > 0
-                      ? selectedStaffProfile.jobInfo[0].areaOfExpertise
-                      : "Not specified"}
-                  </p>
-                </div>
-              )}
             </div>
             <div className="flex justify-end space-x-4">
               <button
@@ -406,74 +411,84 @@ export default function Staff() {
       {viewProfile && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow-lg w-1/2">
-            <div className="flex justify-between items-start mb-6">
-              <h2 className="text-2xl font-bold">
-                Profile of {viewProfile.name}
-              </h2>
-              <div className="w-24 h-24 rounded-lg bg-gray-200 overflow-hidden flex items-center justify-center border-4 border-gray-300">
+          <div className="flex flex-col md:flex-row gap-6 items-start">
+              {/* Left side: Info */}
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-6">
+                  <h2 className="text-2xl font-bold">
+                    Profile of {viewProfile.name}
+                  </h2>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold">Email</h3>
+                  <p>{viewProfile.email}</p>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold">Faculty</h3>
+                  <p>
+                    {viewProfile.faculty
+                      ? viewProfile.faculty.name
+                      : "Not assigned"}
+                  </p>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold">Department</h3>
+                  <p>{viewProfile.department.name}</p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowMoreInfo(!showMoreInfo)}
+                    className="py-2 px-4 bg-teal-500  text-white rounded hover:bg-teal-600 cursor-pointer mb-4"
+                  >
+                    {showMoreInfo ? "Hide Information" :  "More Information"}
+                  </button>
+                  {showMoreInfo && (
+                    <div className="mt-2 mb-4">
+                      <h3 className="text-xl  font-bold">JoInformation</h3>
+                      <p>
+                        <strong>Designation:</strong>{" "}
+                        {viewProfile.jobInfo &&
+                        viewProfile.jobInfo.length > 0
+                          ? viewProfile.jobInfo[0].designation
+                          : "Not specified"}
+                      </p>
+                      <p>
+                        <strong>Contact Number:</strong>{" "}
+                        {viewProfile.jobInfo &&
+                        viewProfile.jobInfo.length > 0
+                          ? viewProfile.jobInfo[0].contactNumber
+                          : "Not specified"}
+                      </p>
+                      <p>
+                        <strong>Qualifications:</strong>{" "}
+                        {viewProfile.jobInfo &&
+                        viewProfile.jobInfo.length > 0
+                          ? viewProfile.jobInfo[0].qualifications
+                          : "Not specified"}
+                      </p>
+                      <p>
+                        <strong>Area of Expertise:</strong> {""}
+                        {viewProfile.jobInfo &&
+                        viewProfile.jobInfo.length > 0
+                          ? viewProfile.jobInfo[0].areaOfExpertise
+                          : "Not specified"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* Right side: Image */}
+              <div className="w-30 h-30 rounded-lg  bg-gray-2overflow-hidden border-4 border-gray-300">
                 {viewProfile.profilePicture ? (
                   <img
-                    src={`http://localhost:4000/uploads/profile/${viewProfile.profilePicture}`}
+                  src={`http://localhost:4000/uploads/profile/${viewProfile.profilePicture}`}
                     alt={viewProfile.name}
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <FaUser size={50} className="text-gray-400" />
+                  <FaUser size={110} className="text-gray-400" />
                 )}
               </div>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Email</h3>
-              <p>{viewProfile.email}</p>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Faculty</h3>
-              <p>
-                {viewProfile.faculty
-                  ? viewProfile.faculty.name
-                  : "Not assigned"}
-              </p>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Department</h3>
-              <p>{viewProfile.department.name}</p>
-            </div>
-            <div className="mt-4">
-              <button
-                onClick={() => setShowMoreInfo(!showMoreInfo)}
-                className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer mb-4"
-              >
-                {showMoreInfo ? "Hide Information" : "More Information"}
-              </button>
-              {showMoreInfo && (
-                <div className="mt-2 mb-4">
-                  <h3 className="text-xl font-bold">Job Information</h3>
-                  <p>
-                    <strong>Designation:</strong>{" "}
-                    {viewProfile.jobInfo && viewProfile.jobInfo.length > 0
-                      ? viewProfile.jobInfo[0].designation
-                      : "Not specified"}
-                  </p>
-                  <p>
-                    <strong>Contact Number:</strong>{" "}
-                    {viewProfile.jobInfo && viewProfile.jobInfo.length > 0
-                      ? viewProfile.jobInfo[0].contactNumber
-                      : "Not specified"}
-                  </p>
-                  <p>
-                    <strong>Qualifications:</strong>{" "}
-                    {viewProfile.jobInfo && viewProfile.jobInfo.length > 0
-                      ? viewProfile.jobInfo[0].qualifications
-                      : "Not specified"}
-                  </p>
-                  <p>
-                    <strong>Area of Expertise:</strong>{" "}
-                    {viewProfile.jobInfo && viewProfile.jobInfo.length > 0
-                      ? viewProfile.jobInfo[0].areaOfExpertise
-                      : "Not specified"}
-                  </p>
-                </div>
-              )}
             </div>
             <div className="flex justify-end space-x-4">
               <button

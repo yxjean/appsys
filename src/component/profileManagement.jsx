@@ -61,6 +61,7 @@ const ProfileManagement = () => {
     }
   };
 
+  // Change name field to be not editable
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
@@ -238,9 +239,8 @@ const ProfileManagement = () => {
             type="text"
             name="name"
             value={user.name}
-            onChange={handleInputChange}
-            className="p-2 border border-gray-300 rounded w-full"
-            required
+            className="p-2 border border-gray-300 rounded w-full bg-gray-100"
+            readOnly
           />
         </div>
         <div className="mb-4">
@@ -261,6 +261,18 @@ const ProfileManagement = () => {
             type="text"
             name="faculty"
             value={user.faculty?.name || "No faculty assigned"}
+            className="p-2 border border-gray-300 rounded w-full bg-gray-100"
+            readOnly
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700">
+            Department
+          </label>
+          <input
+            type="text"
+            name="department"
+            value={user.department?.name || "No department assigned"}
             className="p-2 border border-gray-300 rounded w-full bg-gray-100"
             readOnly
           />

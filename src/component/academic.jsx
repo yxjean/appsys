@@ -35,7 +35,6 @@ const AcademicStaff = ({ onDepartmentChange }) => {
     "Professor",
     "Associate Professor",
     "Assistant Professor",
-    "Senior Lecturer",
     "Lecturer",
   ];
 
@@ -446,11 +445,75 @@ const AcademicStaff = ({ onDepartmentChange }) => {
       {selectedStaff && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
           <div className="bg-white p-6 rounded shadow-lg w-3/4 max-h-full overflow-y-auto">
-            <div className="flex justify-between items-start mb-6">
-              <h2 className="text-2xl font-bold">
-                Profile of {selectedStaff.name}
-              </h2>
-              <div className="w-40 h-40 rounded-lg bg-gray-200 overflow-hidden absolute top-[250px] right-[270px] items-center justify-center border-4 border-gray-300">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              {/* Left side: Info */}
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-6">
+                  <h2 className="text-2xl font-bold">
+                    Profile of {selectedStaff.name}
+                  </h2>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold">Email</h3>
+                  <p>{selectedStaff.email}</p>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold">Faculty</h3>
+                  <p>
+                    {selectedStaff.faculty
+                      ? selectedStaff.faculty.name
+                      : "No faculty assigned"}
+                  </p>
+                </div>
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold">Department</h3>
+                  <p>
+                    {selectedStaff.department
+                      ? selectedStaff.department.name
+                      : "No department assigned"}
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowMoreInfo(!showMoreInfo)}
+                    className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600     cursor-pointer mb-4"
+                  >
+                    {showMoreInfo ? "Hide Information" : "More Information"}
+                  </button>
+                  {showMoreInfo && (
+                    <div className="mt-2 mb-4">
+                      <h3 className="text-xl font-bold">Job Information</h3>
+                      <p>
+                        <strong>Designation:</strong>{" "}
+                        {selectedStaff.jobInfo && selectedStaff.jobInfo.length > 0
+                          ? selectedStaff.jobInfo[0].designation
+                          : "Not specified"}
+                      </p>
+                      <p>
+                        <strong>Contact Number:</strong>{" "}
+                        {selectedStaff.jobInfo && selectedStaff.jobInfo.length > 0
+                          ? selectedStaff.jobInfo[0].contactNumber
+                          : "Not specified"}
+                      </p>
+                      <p>
+                        <strong>Qualifications:</strong>{" "}
+                        {selectedStaff.jobInfo && selectedStaff.jobInfo.length > 0
+                          ? selectedStaff.jobInfo[0].qualifications
+                          : "Not specified"}
+                      </p>
+                      <p>
+                        <strong>Area of Expertise:</strong>{" "}
+                        {selectedStaff.jobInfo && selectedStaff.jobInfo.length > 0
+                          ? selectedStaff.jobInfo[0].areaOfExpertise
+                          : "Not specified"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right side: Image */}
+              <div className="w-40 h-40 rounded-lg bg-gray-200 overflow-hidden border-4 border-gray-300">
                 {selectedStaff.profilePicture ? (
                   <img
                     src={`http://localhost:4000/uploads/profile/${selectedStaff.profilePicture}`}
@@ -462,72 +525,14 @@ const AcademicStaff = ({ onDepartmentChange }) => {
                 )}
               </div>
             </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Email</h3>
-              <p>{selectedStaff.email}</p>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Faculty</h3>
-              <p>
-                {selectedStaff.faculty
-                  ? selectedStaff.faculty.name
-                  : "No faculty assigned"}
-              </p>
-            </div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Department</h3>
-              <p>
-                {selectedStaff.department
-                  ? selectedStaff.department.name
-                  : "No department assigned"}
-              </p>
-            </div>
-            <div className="mt-4">
-              <button
-                onClick={() => setShowMoreInfo(!showMoreInfo)}
-                className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer mb-4"
-              >
-                {showMoreInfo ? "Hide Information" : "More Information"}
-              </button>
-              {showMoreInfo && (
-                <div className="mt-2 mb-4">
-                  <h3 className="text-xl font-bold">Job Information</h3>
-                  <p>
-                    <strong>Designation:</strong>{" "}
-                    {selectedStaff.jobInfo && selectedStaff.jobInfo.length > 0
-                      ? selectedStaff.jobInfo[0].designation
-                      : "Not specified"}
-                  </p>
-                  <p>
-                    <strong>Contact Number:</strong>{" "}
-                    {selectedStaff.jobInfo && selectedStaff.jobInfo.length > 0
-                      ? selectedStaff.jobInfo[0].contactNumber
-                      : "Not specified"}
-                  </p>
-                  <p>
-                    <strong>Qualifications:</strong>{" "}
-                    {selectedStaff.jobInfo && selectedStaff.jobInfo.length > 0
-                      ? selectedStaff.jobInfo[0].qualifications
-                      : "Not specified"}
-                  </p>
-                  <p>
-                    <strong>Area of Expertise:</strong>{" "}
-                    {selectedStaff.jobInfo && selectedStaff.jobInfo.length > 0
-                      ? selectedStaff.jobInfo[0].areaOfExpertise
-                      : "Not specified"}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="mt-4">
+
+            <div className="flex justify-end space-x-4">
               <button
                 onClick={() => fetchStaffReport(selectedStaff._id)}
                 className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
               >
                 View Report
               </button>
-            </div>
-            <div className="flex justify-end">
               <button
                 onClick={() => setSelectedStaff(null)}
                 className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer"
