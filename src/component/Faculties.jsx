@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import AddIcon from '@mui/icons-material/Add'
 import {
   FaPlus,
   FaTrash,
@@ -43,6 +44,7 @@ const Faculties = ({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [itemToRemove, setItemToRemove] = useState(null);
   const [removalType, setRemovalType] = useState("");
+  const [ facultyMdlDepartmentInputs, setFacultyMdlDepartmentInputs ] = useState([]);
 
   const openPrivilegesModal = async (staffId, staffList, departmentId) => {
     try {
@@ -169,7 +171,10 @@ const Faculties = ({
     try {
       const { data } = await axios.post(
         "http://localhost:4000/api/faculties/add",
-        { name: facultyName },
+        { 
+          name: facultyName,
+          departments: facultyMdlDepartmentInputs.filter(val=> val)
+        },
         { withCredentials: true }
       );
 
@@ -177,6 +182,7 @@ const Faculties = ({
         setFaculties((prevFaculties) => [...prevFaculties, data.faculty]);
         toast.success("Faculty added successfully.");
         setShowAddFacultyModal(false);
+        clearAddFacultyMdlInputs();
         navigate("/admin");
       } else {
         toast.error(data.message);
@@ -321,6 +327,26 @@ const Faculties = ({
       staff.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => a.name.localeCompare(b.name)); // Sort staff alphabetically
+
+  function addDepartmentInput() {
+    if(!facultyMdlDepartmentInputs.length || facultyMdlDepartmentInputs.at(-1)) {
+      setFacultyMdlDepartmentInputs(prevItem=>[...prevItem,""])
+    }
+  }
+
+  function handelFacultyMdlDepartmentInputChg(ind,val) {
+    setFacultyMdlDepartmentInputs((prevItem)=>{
+      const items = [...prevItem];
+      items[ind] = val
+      return items;
+    })
+
+  }
+
+  function clearAddFacultyMdlInputs() {
+    setFacultyMdlDepartmentInputs([]);
+    setNewFacultyName("");
+  }
 
   return (
     <div className="mt-2">
@@ -492,11 +518,23 @@ const Faculties = ({
               value={newFacultyName}
               onChange={(e) => setNewFacultyName(e.target.value)}
               placeholder="Faculty Name"
-              className="p-2 border border-gray-300 rounded w-full mb-4"
+              className="p-2 border border-gray-300 rounded w-full mb-2"
             />
+            {
+              facultyMdlDepartmentInputs.map((val,ind)=>{
+                return (
+                  <input
+                    type="text"
+                    placeholder="Department Name"
+                    value={val}
+                    onChange={(ev)=>{ handelFacultyMdlDepartmentInputChg(ind,ev.target.value) }}
+                    className="p-2 border border-gray-300 rounded w-full mb-2"
+                  />
+              )})}
+            <button onClick={addDepartmentInput} className="w-full rounded flex justify-center items-center cursor-pointer hover:bg-gray-100 active:bg-gray-300 p-1 mb-4"> <AddIcon /> Department </button>
             <div className="flex justify-end">
               <button
-                onClick={() => setShowAddFacultyModal(false)}
+                onClick={() =>{ clearAddFacultyMdlInputs(); setShowAddFacultyModal(false) }}
                 className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer mr-2"
               >
                 Cancel

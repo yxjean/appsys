@@ -3,10 +3,12 @@ import Navbar from "../component/navbar";
 import AcademicStaff from "../component/academic";
 import Performance from "../component/Performance";
 import Faculties from "../component/Faculties";
+import StaffPerformanceSummary from "../component/StaffPerformanceSummary";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FaUser, FaCamera } from "react-icons/fa";
 import { AppContent } from "../context/AppContext";
+
 
 export default function Admin() {
   const [faculties, setFaculties] = useState([]);
@@ -334,6 +336,14 @@ export default function Admin() {
             </li>
             <li>
               <button
+                onClick={() => setSelectedSection("Staff Performance Summary")}
+                className="w-full py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
+              >
+                Staff Performace Summary
+              </button>
+            </li>
+            <li>
+              <button
                 onClick={() => setShowChangePasswordModal(true)}
                 className="w-full py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
               >
@@ -358,6 +368,7 @@ export default function Admin() {
           )}
           {selectedSection === "Academic Staff" && <AcademicStaff />}
           {selectedSection === "Performance Area" && <Performance />}
+          {selectedSection === "Staff Performance Summary" && <StaffPerformanceSummary />}
         </div>
       </div>
 

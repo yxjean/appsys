@@ -45,12 +45,17 @@ const PerformanceReporting = ({ staffId, reportData: initialReportData }) => {
 
   const fetchCategories = async () => {
     try {
+      const userData = await axios.get(
+        "http://localhost:4000/api/user/profile",
+        { withCredentials: true }
+      );
+
       const { data } = await axios.get(
-        "http://localhost:4000/api/performance-categories",
+        "http://localhost:4000/api/performance-categories/user/"+userData.data.user._id,
         { withCredentials: true }
       );
       if (data.success) {
-        setCategories(data.categories);
+        setCategories(data.categories.performance_area_score_distribution);
       } else {
         toast.error(data.message);
       }
@@ -134,7 +139,7 @@ const PerformanceReporting = ({ staffId, reportData: initialReportData }) => {
               >
                 <option value="All">All Categories</option>
                 {categories.map((category) => (
-                  <option key={category._id} value={category.name}>
+                  <option value={category.name}>
                     {category.name}
                   </option>
                 ))}

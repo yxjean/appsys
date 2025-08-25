@@ -1,5 +1,9 @@
 import React, { useState } from "react";
+import * as pdfjsLib from "pdfjs-dist";
 import axios from "axios";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
+
 
 const Publication = ({ onEntryAdded }) => {
   const [type, setType] = useState("Journal");
@@ -14,8 +18,33 @@ const Publication = ({ onEntryAdded }) => {
     setCategory(""); // Reset category when type changes
   };
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+  const handleFileChange = async (ev) => {
+    const file = ev.target.files[0];
+    if (!file) return;
+
+    setFile(file);
+
+    const fileReader = new FileReader();
+    fileReader.onload = async function () {
+      const typedArray = new Uint8Array(this.result);
+      const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+
+      // Try metadata first
+      const metadata = await pdf.getMetadata();
+      const metaTitle = metadata?.info?.Title;
+      if (metaTitle) {
+        setTitle(metaTitle);
+        return;
+      }
+
+      // Fallback to first text on first page
+      const page = await pdf.getPage(1);
+      const content = await page.getTextContent();
+      const text = content.items.map((item) => item.str).filter(Boolean);
+      setTitle(text[0] || 'No title found');
+    };
+
+    fileReader.readAsArrayBuffer(file);
   };
 
   const handleSubmit = async (e) => {

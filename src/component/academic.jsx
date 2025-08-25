@@ -5,6 +5,12 @@ import AdminPerformanceReporting from "./adminPerformanceReporting";
 import { FaPlus, FaTrash, FaFilter, FaSearch, FaUser } from "react-icons/fa";
 
 const AcademicStaff = ({ onDepartmentChange }) => {
+  const [currSelectedPage, setCurrSelectedPage] = useState(1);
+  const [pagination, setPagination] = useState([(
+    <li>
+      <a aria-current="page" class="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">1</a>
+    </li>
+  )])
   const [staff, setStaff] = useState([]);
   const [showStaffModal, setShowStaffModal] = useState(false);
   const [newStaff, setNewStaff] = useState({
@@ -26,6 +32,7 @@ const AcademicStaff = ({ onDepartmentChange }) => {
   const [filteredDepartments, setFilteredDepartments] = useState([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [staffIdToRemove, setStaffIdToRemove] = useState(null);
+  const [searchResultsElement, setSearchResultsElement] = useState([]);
 
 
   const [searchType, setSearchType] = useState("name");
@@ -43,6 +50,90 @@ const AcademicStaff = ({ onDepartmentChange }) => {
     fetchFaculties();
     fetchDepartments();
   }, []);
+
+  useEffect(()=>{
+    const pagination = [];
+    const entriesElementStartInd = (currSelectedPage - 1) * 10;
+    let viewableSearchResults = searchResults.sort((a, b) => a.name.localeCompare(b.name)).map((staffMember) => {
+      let facultyName = "";
+      let departmentName = "";
+
+      if (staffMember.faculty) {
+        facultyName =
+          typeof staffMember.faculty === "object"
+            ? staffMember.faculty.name
+            : faculties.find((f) => f._id === staffMember.faculty)
+                ?.name || "";
+      }
+
+      if (staffMember.department) {
+        departmentName =
+          typeof staffMember.department === "object"
+            ? staffMember.department.name
+            : departments.find((d) => d._id === staffMember.department)
+                ?.name || "";
+      }
+
+      return (
+        <li
+          key={staffMember._id}
+          className="p-2 border border-gray-300 rounded flex justify-between items-center"
+        >
+          <div>
+            <span className="font-bold">{staffMember.name}</span>
+            {departmentName && (
+              <span className="text-gray-600 text-sm ml-2">
+                {departmentName}
+              </span>
+            )}
+            {facultyName && (
+              <span className="text-gray-500 text-sm ml-2">
+                ({facultyName})
+              </span>
+            )}
+          </div>
+          <div>
+            <button
+              onClick={() => viewStaffProfile(staffMember._id)}
+              className="py-1 px-3 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer mr-2"
+            >
+              View Profile
+            </button>
+            <button
+              onClick={() => {
+                setStaffIdToRemove(staffMember._id);
+                setShowConfirmModal(true);
+              }}
+              className="p-2 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
+              title="Remove Staff"
+            >
+              <FaTrash />
+            </button>
+          </div>
+        </li>
+      );
+    })
+
+
+    for(let x = 1;x <= Math.ceil(searchResults.length / 10);x++) {
+      pagination.push(
+        x === currSelectedPage?(
+          <li>
+            <a onClick={()=>{setCurrSelectedPage(x)}} class="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">{x}</a>
+          </li>
+        ):(
+          <li>
+            <a onClick={()=>{setCurrSelectedPage(x)}} class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">{x}</a>
+          </li>
+      ));
+    }
+
+    setPagination(pagination);
+
+    viewableSearchResults = viewableSearchResults.slice(entriesElementStartInd,entriesElementStartInd + 10);
+    setSearchResultsElement(viewableSearchResults);
+
+  },[searchResults,currSelectedPage])
 
   const handleSearch = () => {
     if (!searchQuery.trim()) {
@@ -374,72 +465,26 @@ const AcademicStaff = ({ onDepartmentChange }) => {
 
         {/* Staff list display */}
         <ul className="space-y-2">
-          {searchResults.length > 0 ? (
-            searchResults.sort((a, b) => a.name.localeCompare(b.name)).map((staffMember) => {
-              let facultyName = "";
-              let departmentName = "";
-
-              if (staffMember.faculty) {
-                facultyName =
-                  typeof staffMember.faculty === "object"
-                    ? staffMember.faculty.name
-                    : faculties.find((f) => f._id === staffMember.faculty)
-                        ?.name || "";
-              }
-
-              if (staffMember.department) {
-                departmentName =
-                  typeof staffMember.department === "object"
-                    ? staffMember.department.name
-                    : departments.find((d) => d._id === staffMember.department)
-                        ?.name || "";
-              }
-
-              return (
-                <li
-                  key={staffMember._id}
-                  className="p-2 border border-gray-300 rounded flex justify-between items-center"
-                >
-                  <div>
-                    <span className="font-bold">{staffMember.name}</span>
-                    {departmentName && (
-                      <span className="text-gray-600 text-sm ml-2">
-                        {departmentName}
-                      </span>
-                    )}
-                    {facultyName && (
-                      <span className="text-gray-500 text-sm ml-2">
-                        ({facultyName})
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <button
-                      onClick={() => viewStaffProfile(staffMember._id)}
-                      className="py-1 px-3 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer mr-2"
-                    >
-                      View Profile
-                    </button>
-                    <button
-                      onClick={() => {
-                        setStaffIdToRemove(staffMember._id);
-                        setShowConfirmModal(true);
-                      }}
-                      className="p-2 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
-                      title="Remove Staff"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                </li>
-              );
-            })
-          ) : (
+          {searchResults.length > 0 ? searchResultsElement : (
             <li className="p-4 text-center text-gray-500">
               No staff members found matching your search criteria
             </li>
           )}
         </ul>
+      </div>
+
+      <div class="flex justify-center mt-10 cursor-pointer">
+        <nav aria-label="Page navigation example">
+          <ul class="inline-flex -space-x-px text-base h-10">
+            <li>
+              <a onClick={()=>{currSelectedPage > 1 && setCurrSelectedPage(currSelectedPage - 1)}} class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">Previous</a>
+            </li>
+            {pagination}
+            <li>
+              <a onClick={()=>{ currSelectedPage < pagination.length && setCurrSelectedPage(currSelectedPage + 1)}} class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">Next</a>
+            </li>
+          </ul>
+        </nav>
       </div>
 
       {selectedStaff && (

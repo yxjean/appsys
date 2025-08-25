@@ -10,6 +10,12 @@ import Consultancy from "./categories/Consultancy";
 import Research from "./categories/Research";
 
 const PerformanceArea = () => {
+  const [currSelectedPage, setCurrSelectedPage] = useState(1);
+  const [pagination, setPagination] = useState([(
+    <li>
+      <a aria-current="page" class="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">1</a>
+    </li>
+  )])
   const [entries, setEntries] = useState([]);
   const [showEntryModal, setShowEntryModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -20,6 +26,8 @@ const PerformanceArea = () => {
     total: 0,
     percentage: 0,
   });
+  const [ userData, setUserData ] = useState("");
+
 
   useEffect(() => {
     fetchCategories();
@@ -29,16 +37,23 @@ const PerformanceArea = () => {
   useEffect(() => {
     filterEntries();
     calculateCategoryProgress();
-  }, [entries, selectedCategory, categories]);
+  }, [entries, selectedCategory, categories,currSelectedPage]);
+
+
 
   const fetchCategories = async () => {
     try {
+      const userData = await axios.get(
+        "http://localhost:4000/api/user/profile",
+        { withCredentials: true }
+      );
+
       const { data } = await axios.get(
-        "http://localhost:4000/api/performance-categories",
+        "http://localhost:4000/api/performance-categories/user/"+userData.data.user._id,
         { withCredentials: true }
       );
       if (data.success) {
-        setCategories(data.categories);
+        setCategories(data.categories.performance_area_score_distribution);
       } else {
         toast.error(data.message);
       }
@@ -64,13 +79,28 @@ const PerformanceArea = () => {
   };
 
   const filterEntries = () => {
-    if (selectedCategory === "") {
-      setFilteredEntries(entries);
-    } else {
-      setFilteredEntries(
-        entries.filter((entry) => entry.area === selectedCategory)
-      );
+    const pagination = [];
+    const entriesElementStartInd = (currSelectedPage - 1) * 10;
+    let displayedEntries = selectedCategory === ""?entries:entries.filter(entry=> entry.area === selectedCategory);
+
+
+
+    for(let x = 1;x <= Math.ceil(displayedEntries.length / 10);x++) {
+      pagination.push(
+        x === currSelectedPage?(
+          <li>
+            <a onClick={()=>{setCurrSelectedPage(x)}} class="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">{x}</a>
+          </li>
+        ):(
+          <li>
+            <a onClick={()=>{setCurrSelectedPage(x)}} class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">{x}</a>
+          </li>
+      ));
     }
+    setPagination(pagination);
+
+    displayedEntries = displayedEntries.slice(entriesElementStartInd,entriesElementStartInd + 10);
+    setFilteredEntries(displayedEntries);
   };
 
   const calculateCategoryProgress = () => {
@@ -453,7 +483,7 @@ const PerformanceArea = () => {
           >
             <option value="">Select Area</option>
             {categories.map((category) => (
-              <option key={category._id} value={category.name}>
+              <option  value={category.name}>
                 {category.name}
               </option>
             ))}
@@ -499,6 +529,13 @@ const PerformanceArea = () => {
             <p>
               <strong>Area:</strong> {entry.area}
             </p>
+            {/* Date */}
+            {entry.date && (
+              <p>
+                <strong>Uploaded Date:</strong>{" "}
+                {new Date(entry.date).toLocaleDateString("en-GB")}
+              </p>
+            )}
             <div>
               <strong>Details:</strong>
               <div className="bg-gray-100 p-3 rounded mt-2">
@@ -515,6 +552,19 @@ const PerformanceArea = () => {
             one.
           </div>
         )}
+        <div class="flex justify-center cursor-pointer">
+          <nav aria-label="Page navigation example">
+            <ul class="inline-flex -space-x-px text-base h-10">
+              <li>
+                <a onClick={()=>{currSelectedPage > 1 && setCurrSelectedPage(currSelectedPage - 1)}} class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">Previous</a>
+              </li>
+              {pagination}
+              <li>
+                <a onClick={()=>{ currSelectedPage < pagination.length && setCurrSelectedPage(currSelectedPage + 1)}} class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">Next</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
 
         {/* Empty state when no category is selected */}
         {!selectedCategory && (

@@ -4,10 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { AppContent } from "../context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import { Popover } from "@mui/material";
 import { FaUser } from "react-icons/fa";
 
-const Navbar = () => {
+const Navbar = ({selectedSection, setSelectedSection}) => {
   const navigate = useNavigate();
+  const [ notifications, setNotifications ] = useState([]);
   const {
     userData,
     backendUrl,
@@ -16,8 +19,19 @@ const Navbar = () => {
     profileImageUrl,
     updateProfileImage,
     profileImageTimestamp,
+    getUserData
   } = useContext(AppContent);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [ isNotificationPopoverShowing, setIsNotificationPopoverShowing ] = useState(null);
+  const [ notificationIconAnchorEl, setNotificationIconAnchorEl ] = useState(null);
+
+  useEffect(()=>{
+    if(window.location.pathname !== "/") {
+      getUserData()
+    }
+
+  },[])
+
 
   useEffect(() => {
     // Fetch user profile to get profile picture if available
@@ -38,7 +52,38 @@ const Navbar = () => {
     };
 
     fetchUserProfile();
+    getUserNotifications();
   }, [userData]);
+
+
+  async function getUserNotifications() {
+    if(userData) {
+      const { data } = await axios.get(
+        "http://localhost:4000/api/notifications/user/"+userData.id,
+        { withCredentials: true }
+      )
+
+      if(data.success) {
+        setNotifications(data.notifications);
+      }
+    }
+  }
+
+  function handleNotificationOnClick() {
+    setSelectedSection("Calendar"); 
+    setNotificationIconAnchorEl(null);
+    setIsNotificationPopoverShowing(false);
+  }
+
+  function handlePopoverOnClose() {
+    setNotificationIconAnchorEl(null);
+    setIsNotificationPopoverShowing(false);
+  }
+
+  function handleNotificationIconOnClick(ev) {
+    setNotificationIconAnchorEl(ev.currentTarget)
+    setIsNotificationPopoverShowing(!isNotificationPopoverShowing)
+  }
 
   const logout = async () => {
     try {
@@ -104,6 +149,34 @@ const Navbar = () => {
               </ul>
             </div>
           )}
+          <NotificationsNoneIcon onClick={handleNotificationIconOnClick} className="cursor-pointer ml-5" />
+          <Popover
+            open={isNotificationPopoverShowing}
+            anchorEl={notificationIconAnchorEl}
+            onClose={handlePopoverOnClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            slotProps={{
+              paper: {
+                sx: {
+                  width: 250,        // fixed width
+                  maxHeight: 400,    // maximum height
+                  overflowY: "auto", // scroll if content overflows
+                }}
+            }}
+          >
+            {
+              notifications.length? (notifications.map((val,ind)=> (
+                  <a className="flex flex-col px-5 pt-3 w-full hover:bg-gray-100" onClick={handleNotificationOnClick}>
+                    <strong>{val.title}</strong>
+                    <label className="mb-3 cursor-pointer">{val.description}</label>
+                    {notifications.length - 1 === ind? null:(<hr className="border-gray-400"/>)}
+                  </a>
+              ))) :(<strong className="px-5 py-5 block">No notification available</strong>)
+            }
+          </Popover>
         </div>
       ) : (
         <button

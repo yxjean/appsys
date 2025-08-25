@@ -46,12 +46,18 @@ const AdminPerformanceReporting = ({ staffId }) => {
 
   const fetchCategories = async () => {
     try {
+      const userData = await axios.get(
+        "http://localhost:4000/api/user/profile",
+        { withCredentials: true }
+      );
+
+
       const { data } = await axios.get(
-        "http://localhost:4000/api/performance-categories",
+        "http://localhost:4000/api/performance-categories/user/"+userData._id,
         { withCredentials: true }
       );
       if (data.success) {
-        setCategories(data.categories);
+        setCategories(data.categories.performance_area_score_distribution);
       } else {
         toast.error(data.message);
       }

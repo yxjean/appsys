@@ -4,6 +4,9 @@ import ProfileManagement from "../component/profileManagement";
 import PerformanceReporting from "../component/performanceReporting";
 import PerformanceArea from "../component/performanceArea";
 import AdminPerformanceReporting from "../component/adminPerformanceReporting";
+import StaffDetails from "../component/staffDetails";
+import Calendar from "../component/Calendar";
+import StaffPerformanceSummary from "../component/StaffPerformanceSummary";
 import axios from "axios";
 import { toast } from "react-toastify";
 import {
@@ -14,8 +17,14 @@ import {
   FaSortAmountDown,
   FaUser,
 } from "react-icons/fa";
+import { DataGrid } from '@mui/x-data-grid';
+
+
+
+
 
 export default function Staff() {
+  const [currSelectedPage, setCurrSelectedPage] = useState(1);
   const [selectedSection, setSelectedSection] = useState("Profile Management");
   const [privileged, setPrivileged] = useState(false);
   const [departmentStaff, setDepartmentStaff] = useState([]);
@@ -31,10 +40,150 @@ export default function Staff() {
   const [sortOrder, setSortOrder] = useState("alphabetical");
   const [isLoadingEntries, setIsLoadingEntries] = useState(false);
   const [showMoreInfo, setShowMoreInfo] = useState(false);
+  const [filteredViewableStaff, setFilteredViewableStaff] = useState([]);
+  const [staffEntriesDataElement,setStaffEntriesDataElement] = useState([]);
+  const [mdlCurrSelectedPage, setMdlCurrSelectedPage] = useState(1);
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10});
+  const [rows,setRows] = useState([]);
+  const [selectedStaffDetails, setSelectedStaffDetails] = useState({});
+  //const [pagination, setPagination] = useState([(
+  //  <li>
+  //    <a aria-current="page" class="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">1</a>
+  //  </li>
+  //)])
+  const [mdlPagination, setMdlPagination] = useState([(
+    <li>
+      <a aria-current="page" class="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">1</a>
+    </li>
+  )])
+
+  const columns = [
+    { field: "id", headerName: "ID", flex: 1, renderCell: (params)=>(
+      <a onClick={()=>{setSelectedSection('Staff Details'), setSelectedStaffDetails(params.row)}} style={{color: "blue", cursor: "pointer"}}>{params.row.id}</a>
+    )},
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "email", headerName: "Email", flex: 1 },
+    { field: "faculty", headerName: "Faculty", flex: 1 },
+    { field: "department", headerName: "Department", flex: 1 },
+    { field: "designation", headerName: "Designation", flex: 1 },
+    { field: "contactNumber", headerName: "Contact Number", flex: 1 },
+    { field: "qualifications", headerName: "Qualifications", flex: 1 },
+    { field: "areaOfExpertise", headerName: "Area of Expertise", flex: 1 }
+  ]
 
   useEffect(() => {
     fetchViewableStaff();
   }, []);
+
+  useEffect(()=>{
+    setRows(filteredStaff.map((item)=>{
+      return {
+        id: item._id,
+        name: item.name,
+        email: item.email,
+        faculty: item.jobInfo[0].facultyName,
+        department: item.departmentName,
+        designation: item.jobInfo[0].designation || "-",
+        contactNumber: item.jobInfo[0].contactNumber || "-",
+        qualifications: item.jobInfo[0].qualifications || "-",
+        areaOfExpertise: item.jobInfo[0].areaOfExpertise || "-",
+        profilePic: item.profilePicture
+      }
+    }))
+
+
+    //const pagination = [];
+    //const entriesElementStartInd = (currSelectedPage - 1) * 10;
+    //let viewableStaff = filteredStaff.filter((staff) =>
+    //  staff.name.toLowerCase().includes(staffSearchQuery.toLowerCase())
+    //);
+
+
+    //for(let x = 1;x <= Math.ceil(viewableStaff.length / 10);x++) {
+    //  pagination.push(
+    //    x === currSelectedPage?(
+    //      <li>
+    //        <a onClick={()=>{setCurrSelectedPage(x)}} class="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">{x}</a>
+    //      </li>
+    //    ):(
+    //      <li>
+    //        <a onClick={()=>{setCurrSelectedPage(x)}} class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">{x}</a>
+    //      </li>
+    //  ));
+    //}
+
+
+    //setPagination(pagination);
+
+
+    //viewableStaff = viewableStaff.slice(entriesElementStartInd,entriesElementStartInd + 10);
+    //setFilteredViewableStaff(viewableStaff);
+  },[filteredStaff])
+
+
+
+
+  useEffect(()=>{
+    const pagination = [];
+    const entriesElementStartInd = (mdlCurrSelectedPage - 1) * 10;
+
+    for(let x = 1;x <= Math.ceil(staffEntriesData.length / 10);x++) {
+      pagination.push(
+        x === mdlCurrSelectedPage?(
+          <li>
+            <a onClick={()=>{setMdlCurrSelectedPage(x)}} class="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">{x}</a>
+          </li>
+        ):(
+          <li>
+            <a onClick={()=>{setMdlCurrSelectedPage(x)}} class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">{x}</a>
+          </li>
+      ));
+    }
+
+
+    setMdlPagination(pagination);
+
+
+    let viewableStaffEntriesData = staffEntriesData.slice(entriesElementStartInd,entriesElementStartInd + 10);
+
+
+
+    setStaffEntriesDataElement(
+      sortStaffEntries(viewableStaffEntriesData).map((staff) => (
+        <tr key={staff.id} className="hover:bg-gray-50">
+          <td className="py-2 px-3 border-b font-medium">
+            {staff.name}
+          </td>
+          <td className="py-2 px-3 border-b text-center">
+            {staff.Publication}
+          </td>
+          <td className="py-2 px-3 border-b text-center">
+            {staff.Research}
+          </td>
+          <td className="py-2 px-3 border-b text-center">
+            {staff["Teaching & Undergraduate Supervision"]}
+          </td>
+          <td className="py-2 px-3 border-b text-center">
+            {staff["Postgraduate Supervision"]}
+          </td>
+          <td className="py-2 px-3 border-b text-center">
+            {staff.VASI}
+          </td>
+          <td className="py-2 px-3 border-b text-center">
+            {staff["Administrative Service"]}
+          </td>
+          <td className="py-2 px-3 border-b text-center">
+            {staff.Consultancy}
+          </td>
+          <td className="py-2 px-3 border-b text-center font-bold">
+            {staff.total}
+          </td>
+        </tr>
+      ))
+    )
+
+  },[staffEntriesData,mdlCurrSelectedPage])
+
 
   const fetchViewableStaff = async () => {
     try {
@@ -81,7 +230,11 @@ export default function Staff() {
       setPrivileged(false);
       toast.error(error.message);
     }
+
+
   };
+
+
 
   const viewStaffProfile = async (id) => {
     if (!id) {
@@ -196,13 +349,13 @@ export default function Staff() {
     }
   };
 
-  const filteredViewableStaff = filteredStaff.filter((staff) =>
-    staff.name.toLowerCase().includes(staffSearchQuery.toLowerCase())
-  );
+
+
+
 
   return (
     <div className="flex">
-      <Navbar />
+      <Navbar selectedSection={selectedSection} setSelectedSection={setSelectedSection} />
       <div className="flex w-full pt-20">
         <div className="w-1/6 min-h-screen bg-gray-200 p-4 mt-5">
           <h2 className="text-2xl font-bold mb-4">Staff Panel</h2>
@@ -241,14 +394,32 @@ export default function Staff() {
                 </button>
               </li>
             )}
+            <li>
+              <button
+                onClick={() => setSelectedSection("Staff Performance Summary")}
+                className="w-full py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
+              >
+                Staff Performance Summary
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setSelectedSection('Calendar')}
+                className="w-full py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
+              >
+                Calendar
+              </button>
+            </li>
           </ul>
         </div>
         <div className="w-5/6 h-full min-h-screen p-4">
+          {selectedSection === "Staff Details" && <StaffDetails staffDetails={selectedStaffDetails} />}
           {selectedSection === "Profile Management" && <ProfileManagement />}
           {selectedSection === "Performance Reporting" && (
             <PerformanceReporting />
           )}
           {selectedSection === "Performance Area" && <PerformanceArea />}
+          {selectedSection === "Staff Performance Summary" && <StaffPerformanceSummary />}
           {selectedSection === "View All Staff" && (
             <div className="bg-white p-6 rounded shadow-lg h-screen overflow-auto">
               <div className="flex justify-between items-center mb-4">
@@ -261,8 +432,20 @@ export default function Staff() {
                 </button>
               </div>
 
+              <DataGrid
+                autoHeight
+                rows={rows}
+                columns={columns}
+                paginationModel={paginationModel}
+                onPaginationModelChange={setPaginationModel}
+                pageSizeOptions={[10]}
+                disableRowSelectionOnClick  
+                checkboxSelection={false}   
+              />
+
+
               {/* Search bar */}
-              <div className="mb-4 relative">
+            {/*}<div className="mb-4 relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <FaSearch className="text-gray-400" />
                 </div>
@@ -275,7 +458,8 @@ export default function Staff() {
                 />
               </div>
 
-              <ul className="space-y-2">
+
+            <ul className="space-y-2">
                 {filteredViewableStaff.length > 0 ? (
                   filteredViewableStaff.sort((a, b) => a.name.localeCompare(b.name)).map((staffMember) => (
                     <li
@@ -299,11 +483,25 @@ export default function Staff() {
                   </li>
                 )}
               </ul>
+              <div class="flex justify-center mt-10 cursor-pointer">
+                <nav aria-label="Page navigation example">
+                  <ul class="inline-flex -space-x-px text-base h-10">
+                    <li>
+                      <a onClick={()=>{currSelectedPage > 1 && setCurrSelectedPage(currSelectedPage - 1)}} class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">Previous</a>
+                    </li>
+                    {pagination}
+                    <li>
+                      <a onClick={()=>{ currSelectedPage < pagination.length && setCurrSelectedPage(currSelectedPage + 1)}} class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">Next</a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>*/}
             </div>
           )}
           {selectedSection === "Staff Report" && selectedStaff && (
             <AdminPerformanceReporting staffId={selectedStaff} />
           )}
+          {selectedSection === "Calendar" && <Calendar />}
         </div>
       </div>
       {selectedStaffProfile && (
@@ -389,6 +587,12 @@ export default function Staff() {
               </div>
             </div>
             <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => viewStaffReport(selectedStaffProfile._id)}
+                className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
+              >
+                Bookings
+              </button>
               <button
                 onClick={() => viewStaffReport(selectedStaffProfile._id)}
                 className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
@@ -569,7 +773,6 @@ export default function Staff() {
                 </button>
               </div>
             </div>
-
             {isLoadingEntries ? (
               <div className="flex justify-center items-center p-8">
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
@@ -606,39 +809,8 @@ export default function Staff() {
                     </tr>
                   </thead>
                   <tbody>
-                    {sortStaffEntries(staffEntriesData).map((staff) => (
-                      <tr key={staff.id} className="hover:bg-gray-50">
-                        <td className="py-2 px-3 border-b font-medium">
-                          {staff.name}
-                        </td>
-                        <td className="py-2 px-3 border-b text-center">
-                          {staff.Publication}
-                        </td>
-                        <td className="py-2 px-3 border-b text-center">
-                          {staff.Research}
-                        </td>
-                        <td className="py-2 px-3 border-b text-center">
-                          {staff["Teaching & Undergraduate Supervision"]}
-                        </td>
-                        <td className="py-2 px-3 border-b text-center">
-                          {staff["Postgraduate Supervision"]}
-                        </td>
-                        <td className="py-2 px-3 border-b text-center">
-                          {staff.VASI}
-                        </td>
-                        <td className="py-2 px-3 border-b text-center">
-                          {staff["Administrative Service"]}
-                        </td>
-                        <td className="py-2 px-3 border-b text-center">
-                          {staff.Consultancy}
-                        </td>
-                        <td className="py-2 px-3 border-b text-center font-bold">
-                          {staff.total}
-                        </td>
-                      </tr>
-                    ))}
-
-                    {staffEntriesData.length === 0 && (
+                    {staffEntriesDataElement}
+                    {staffEntriesDataElement.length === 0 && (
                       <tr>
                         <td
                           colSpan="9"
@@ -652,6 +824,20 @@ export default function Staff() {
                 </table>
               </div>
             )}
+
+            <div class="flex justify-center mt-10 cursor-pointer">
+              <nav aria-label="Page navigation example">
+                <ul class="inline-flex -space-x-px text-base h-10">
+                  <li>
+                    <a onClick={()=>{mdlCurrSelectedPage > 1 && setMdlCurrSelectedPage(mdlCurrSelectedPage - 1)}} class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">Previous</a>
+                  </li>
+                  {mdlPagination}
+                  <li>
+                    <a onClick={()=>{ mdlCurrSelectedPage < mdlPagination.length && setMdlCurrSelectedPage(mdlCurrSelectedPage + 1)}} class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">Next</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
 
             <div className="flex justify-end mt-4">
               <button
