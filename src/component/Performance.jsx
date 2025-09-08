@@ -69,6 +69,14 @@ const PerformanceManager = () => {
     }
   };
 
+
+  function capitalizeWords(str) {
+    return str
+      .split(" ")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // capitalize first letter
+      .join(" ");
+  }
+
   return (
     <div className="w-full p-4">
       <h2 className="text-2xl font-bold mb-4">Performance Area Management</h2>
@@ -76,7 +84,7 @@ const PerformanceManager = () => {
         <strong>Designation: </strong>
         <select value={selectedDesignation} onChange={handleDesignationOnChg} class="ml-2 border border-gray-300 rounded-md px-3 py-2 cursor-pointer">
           {categories.map((designation)=>{
-            return (<option value={designation.designation}>{designation.designation}</option>)
+            return (<option value={designation.designation}>{capitalizeWords(designation.designation)}</option>)
           })}
         </select>
       </div>

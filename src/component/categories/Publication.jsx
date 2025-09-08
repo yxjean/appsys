@@ -12,6 +12,7 @@ const Publication = ({ onEntryAdded }) => {
   const [publishedDate, setPublishedDate] = useState("");
   const [category, setCategory] = useState("");
   const [file, setFile] = useState(null);
+  const [ quartile, setQuartile ] = useState("");
 
   const handleTypeChange = (e) => {
     setType(e.target.value);
@@ -56,7 +57,7 @@ const Publication = ({ onEntryAdded }) => {
       formData.append("area", "Publication");
       formData.append(
         "details",
-        JSON.stringify({ type, author, publishedDate, category })
+        JSON.stringify({ type, author, publishedDate, category, "quartile": type === "Journal"?quartile:null })
       );
       formData.append("document", file);
 
@@ -94,6 +95,24 @@ const Publication = ({ onEntryAdded }) => {
           </select>
         </div>
 
+        {/* Upload File */}
+        <div className="mb-4">
+          <label className="block font-bold mb-2">Upload File</label>
+          <div className="relative">
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="block w-full text-base text-gray-700
+                         file:mr-4 file:py-2 file:px-4
+                         file:rounded file:border-0
+                         file:text-base file:font-semibold
+                         file:bg-blue-50 file:text-blue-700
+                         hover:file:bg-blue-100
+                         border border-gray-300 rounded"
+            />
+          </div>
+        </div>
+
         {/* Title */}
         <div>
           <label className="block font-bold mb-2">Title</label>
@@ -109,14 +128,38 @@ const Publication = ({ onEntryAdded }) => {
         {/* Author */}
         <div>
           <label className="block font-bold mb-2">Author</label>
-          <input
-            type="text"
+          <select
+            className="block w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-700 text-sm shadow-sm (ev.target.value)focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            className="p-2 border border-gray-300 rounded w-full"
+            onChange={ev=>setAuthor(ev.target.value)}
             required
-          />
+          >
+            <option value="">Select an author</option>
+            <option value="Main author">Main author</option>
+            <option value="Co-author">Co-author</option>
+            <option value="Corresponding">Corresponding</option>
+          </select>
         </div>
+
+        {
+          type === "Journal" && (
+            <div>
+              <label className="block font-bold mb-2">Quartile</label>
+              <select
+                className="block w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-700 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                value={quartile}
+                onChange={ev=>setQuartile(ev.target.value)}
+                required
+              >
+                <option value="">Select a Quartile</option>
+                <option value="Q1">Q1</option>
+                <option value="Q2">Q2</option>
+                <option value="Q3">Q3</option>
+                <option value="Q4">Q4</option>
+              </select>
+            </div>
+          )
+        }
 
         {/* Published Date */}
         <div>
@@ -159,26 +202,8 @@ const Publication = ({ onEntryAdded }) => {
           </div>
         )}
 
-        {/* Upload File */}
-        <div className="mb-4">
-          <label className="block font-bold mb-2">Upload File</label>
-          <div className="relative">
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="block w-full text-base text-gray-700
-                         file:mr-4 file:py-2 file:px-4
-                         file:rounded file:border-0
-                         file:text-base file:font-semibold
-                         file:bg-blue-50 file:text-blue-700
-                         hover:file:bg-blue-100
-                         border border-gray-300 rounded"
-            />
-          </div>
-        </div>
-
         {/* Submit Button */}
-        <div>
+        <div className="text-right">
           <button
             type="submit"
             className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"

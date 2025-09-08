@@ -9,6 +9,7 @@ const PostgraduateSupervision = ({ onEntryAdded = () => {} }) => {
   const [enrollmentDate, setEnrollmentDate] = useState("");
   const [expectedCompletionDate, setExpectedCompletionDate] = useState("");
   const [faculties, setFaculties] = useState([]);
+  const [ programmeLevel, setProgrammeLevel ] = useState("");
 
   // Fetch faculties for dropdown
   useEffect(() => {
@@ -47,6 +48,7 @@ const PostgraduateSupervision = ({ onEntryAdded = () => {} }) => {
           email,
           enrollmentDate,
           expectedCompletionDate,
+          programmeLevel
         })
       );
 
@@ -164,6 +166,21 @@ const PostgraduateSupervision = ({ onEntryAdded = () => {} }) => {
               className="p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-teal-500"
               required
             />
+          </div>
+          <div>
+            <label className="block font-medium text-gray-700 mb-2">
+              Programme Level
+            </label>
+            <select
+              value={programmeLevel}
+              onChange={(e) => setProgrammeLevel(e.target.value)}
+              className="p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-teal-500"
+              required
+            >
+              <option value="">Select Level</option>
+              <option value="Master">Master</option>
+              <option value="PhD">PhD</option>
+            </select>
           </div>
         </div>
 

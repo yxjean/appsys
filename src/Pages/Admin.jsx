@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import Navbar from "../component/navbar";
 import AcademicStaff from "../component/academic";
 import Performance from "../component/Performance";
@@ -6,11 +6,20 @@ import Faculties from "../component/Faculties";
 import StaffPerformanceSummary from "../component/StaffPerformanceSummary";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { FaUser, FaCamera } from "react-icons/fa";
+import { FaUser, FaCamera, FaPlus } from "react-icons/fa";
 import { AppContent } from "../context/AppContext";
+import { DataGrid } from '@mui/x-data-grid'; 
+import StaffDetails from "../component/staffDetails";
+import AssesmentPeriod from '../component/AssesmentPeriod';
+import CancelIcon from '@mui/icons-material/Cancel';
+import PerformanceArea from "../component/performanceArea";
+import PerformanceReporting from "../component/performanceReporting";
+//import PerformanceAreaPrintTemplate from "../component/PerformanceAreaPrintTemplate";
+import { useReactToPrint } from 'react-to-print';
 
 
 export default function Admin() {
+  const [ rows, setRows ] = useState([]);
   const [faculties, setFaculties] = useState([]);
   const [selectedSection, setSelectedSection] = useState("Faculties");
   const [expandedDepartment, setExpandedDepartment] = useState(null);
@@ -24,11 +33,188 @@ export default function Admin() {
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = React.useRef(null);
   const { updateProfileImage } = useContext(AppContent);
+  const [mdlCurrSelectedPage, setMdlCurrSelectedPage] = useState(1);
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10});
+  const [filteredStaff, setFilteredStaff] = useState([]);
+  const [departmentStaff, setDepartmentStaff] = useState([]);
+  const [privileged, setPrivileged] = useState(false);
+  const [selectedStaffDetails, setSelectedStaffDetails] = useState({});
+  const [staff, setStaff] = useState([]);
+  const [showStaffModal, setShowStaffModal] = useState(false);
+  const [filteredDepartments, setFilteredDepartments] = useState([]);
+  const [ performanceAreaStaffId, setPerformanceAreaStaffId ] = useState("");
+  const [ performanceReportingStaffId, setPerformanceReportingStaffId ] = useState("");
+  const [newStaff, setNewStaff] = useState({
+    name: "",
+    email: "",
+    password: "",
+    department: "",
+    designation: "",
+  });
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [staffIdToRemove, setStaffIdToRemove] = useState(null);
+  const [selectedFaculty, setSelectedFaculty] = useState("");
+  const designationOptions = [
+    "Professor",
+    "Associate Professor",
+    "Assistant Professor",
+    "Lecturer",
+  ];
+
+
+  const columns = [
+    { field: "id", headerName: "ID", flex: 1, renderCell: (params)=>(
+      <a onClick={()=>{setSelectedSection('Staff Details'), setSelectedStaffDetails(params.row)}} style={{color: "blue", cursor: "pointer"}}>{params.row.id}</a>
+    )},
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "email", headerName: "Email", flex: 1 },
+    { field: "faculty", headerName: "Faculty", flex: 1 },
+    { field: "department", headerName: "Department", flex: 1 },
+    { field: "designation", headerName: "Designation", flex: 1 },
+    { field: "contactNumber", headerName: "Contact Number", flex: 1 },
+    { field: "qualifications", headerName: "Qualifications", flex: 1 },
+    { field: "areaOfExpertise", headerName: "Area of Expertise", flex: 1 },
+    { 
+      headerName: "actions",  
+      renderCell: (params)=>(
+        <div className="flex justify-center items-center h-full">
+          <CancelIcon onClick={ ()=>{ setStaffIdToRemove(params.row.id); setShowConfirmModal(true) } }  className="cursor-pointer text-red-500" />
+        </div>
+      )
+    }
+  ]
 
   useEffect(() => {
     fetchFaculties();
     fetchAdminProfile();
+    fetchViewableStaff();
   }, []);
+
+
+
+  useEffect(()=>{
+    setRows(filteredStaff.map((item)=>{
+      return {
+        id: item._id,
+        name: item.name,
+        email: item.email,
+        faculty: item.jobInfo[0].facultyName,
+        department: item.departmentName,
+        designation: item.jobInfo[0].designation || "-",
+        contactNumber: item.jobInfo[0].contactNumber || "-",
+        qualifications: item.jobInfo[0].qualifications || "-",
+        areaOfExpertise: item.jobInfo[0].areaOfExpertise || "-",
+        profilePic: item.profilePicture
+      }
+    }))
+
+  },[filteredStaff])
+
+
+  const handleFacultyChange = async (facultyId) => {
+    setSelectedFaculty(facultyId);
+    try {
+      const { data } = await axios.get(
+        `http://localhost:4000/api/departments?facultyId=${facultyId}`,
+        { withCredentials: true }
+      );
+      if (data.success) {
+        setFilteredDepartments(data.departments);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch departments for the selected faculty.");
+    }
+  };
+
+
+  const fetchStaff = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:4000/api/staff/search?query=",
+        { withCredentials: true }
+      );
+      if (data.success) {
+        setStaff(data.staff);
+        //setSearchResults(data.staff);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+
+  const fetchViewableStaff = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:4000/api/staff/getAdminAllStaff",
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        setRows(data.viewableStaff.map((item)=>{
+
+
+          return {
+            id: item._id,
+            name: item.name,
+            email: item.email,
+            faculty: item.faculty?item.faculty.name : "-",
+            department: item.department.name,
+            designation: item.jobInfo[0].designation || "-",
+            contactNumber: item.jobInfo[0].contactNumber || "-",
+            qualifications: item.jobInfo[0].qualifications || "-",
+            areaOfExpertise: item.jobInfo[0].areaOfExpertise || "-",
+            profilePic: item.profilePicture
+          }
+        }))
+
+
+      //  const viewableStaffIds = data.user.viewableStaff || [];
+      //  const departmentId = data.user.department?._id;
+
+      //  if (departmentId) {
+      //    const staffResponse = await axios.get(
+      //      `http://localhost:4000/api/departments/${departmentId}/staff`,
+      //      { withCredentials: true }
+      //    );
+      //    if (staffResponse.data.success) {
+      //      const allStaff = staffResponse.data.staff || [];
+      //      const filtered = allStaff.filter((staff) =>
+      //        viewableStaffIds.includes(staff._id)
+      //      );
+      //      setRows(allStaff);
+      //      setDepartmentStaff(allStaff);
+      //      setFilteredStaff(filtered);
+      //    } else {
+      //      setDepartmentStaff([]);
+      //      setFilteredStaff([]);
+      //      toast.error(staffResponse.data.message);
+      //    }
+      //  } else {
+      //    setDepartmentStaff([]);
+      //    setFilteredStaff([]);
+      //    toast.error("No department assigned to the user.");
+      //  }
+      //  //setPrivileged(data.user.privileges !== "");
+      } else {
+        setDepartmentStaff([]);
+        setFilteredStaff([]);
+        setPrivileged(false);
+        toast.error(data.message);
+      }
+    } catch (error) {
+      setDepartmentStaff([]);
+      setFilteredStaff([]);
+      setPrivileged(false);
+      toast.error(error.message);
+    }
+
+
+  };
 
   const fetchFaculties = async () => {
     try {
@@ -37,6 +223,110 @@ export default function Admin() {
       });
       if (data.success) {
         setFaculties(data.faculties);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+
+  const addStaff = async () => {
+    try {
+      const jobInfo = [
+        {
+          faculty: selectedFaculty,
+          designation: newStaff.designation,
+          contactNumber: "",
+          qualifications: "",
+          areaOfExpertise: "",
+        },
+      ];
+
+      // Find the faculty and department names before creating staff
+      const selectedFacultyObj = faculties.find(
+        (f) => f._id === selectedFaculty
+      );
+      const selectedDepartmentObj = filteredDepartments.find(
+        (d) => d._id === newStaff.department
+      );
+
+      const { data } = await axios.post(
+        "http://localhost:4000/api/staff/create",
+        {
+          ...newStaff,
+          faculty: selectedFaculty,
+          jobInfo,
+        },
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        const newStaffComplete = {
+          ...data.staff,
+          faculty: {
+            _id: selectedFaculty,
+            name: selectedFacultyObj
+              ? selectedFacultyObj.name
+              : "Unknown Faculty",
+          },
+          department: {
+            _id: newStaff.department,
+            name: selectedDepartmentObj
+              ? selectedDepartmentObj.name
+              : "Unknown Department",
+          },
+        };
+
+        setStaff([...staff, newStaffComplete]);
+        //setSearchResults([...searchResults, newStaffComplete]);
+
+        setNewStaff({
+          name: "",
+          email: "",
+          password: "",
+          department: "",
+          designation: "",
+        });
+
+        setShowStaffModal(false);
+        toast.success("Staff account created");
+
+        fetchViewableStaff()
+        //fetchStaff();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const confirmRemoval = () => {
+    deleteStaff(staffIdToRemove);
+    setShowConfirmModal(false);
+    setStaffIdToRemove(null);
+  };
+
+
+  const deleteStaff = async (id) => {
+    if (!id) {
+      toast.error("Invalid staff ID");
+      return;
+    }
+    try {
+      const { data } = await axios.delete(
+        `http://localhost:4000/api/staff/delete/${id}`,
+        { withCredentials: true }
+      );
+      if (data.success) {
+        setStaff(staff.filter((staffMember) => staffMember._id !== id));
+        fetchViewableStaff();
+        //setSearchResults(
+        //  searchResults.filter((staffMember) => staffMember._id !== id)
+        //);
+        toast.success("Staff account deleted");
       } else {
         toast.error(data.message);
       }
@@ -344,6 +634,14 @@ export default function Admin() {
             </li>
             <li>
               <button
+                onClick={() => setSelectedSection("Assesment Period")}
+                className="w-full py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
+              >
+                Assesment Period
+              </button>
+            </li>
+            <li>
+              <button
                 onClick={() => setShowChangePasswordModal(true)}
                 className="w-full py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
               >
@@ -353,6 +651,8 @@ export default function Admin() {
           </ul>
         </div>
         <div className="w-5/6 min-h-screen p-4">
+          {selectedSection === "Staff Details" && <StaffDetails staffDetails={selectedStaffDetails} setSelectedSection={setSelectedSection} setPerformanceReportingStaffId={setPerformanceReportingStaffId} />}
+          {selectedSection === "Admin & Superior Performance Reporting" && <PerformanceReporting userIdToView={performanceReportingStaffId}/>}
           {selectedSection === "Faculties" && (
             <Faculties
               faculties={faculties}
@@ -366,9 +666,36 @@ export default function Admin() {
               assignPrivileges={assignPrivileges}
             />
           )}
-          {selectedSection === "Academic Staff" && <AcademicStaff />}
-          {selectedSection === "Performance Area" && <Performance />}
-          {selectedSection === "Staff Performance Summary" && <StaffPerformanceSummary />}
+          {selectedSection === "Academic Staff" && (
+            <div className="bg-white p-6 rounded shadow-lg h-screen overflow-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Academic Staff</h2>
+                <button
+                  onClick={() => setShowStaffModal(true)}
+                  className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer flex items-center"
+                >
+                  <FaPlus className="mr-2" /> Add Staff
+                </button>
+              </div>
+
+              <DataGrid
+                autoHeight
+                rows={rows}
+                columns={columns}
+                paginationModel={paginationModel}
+                onPaginationModelChange={setPaginationModel}
+                pageSizeOptions={[10]}
+                disableRowSelectionOnClick  
+                checkboxSelection={false}   
+              />
+            </div>
+
+          )}
+          {selectedSection === "Performance Area" && <Performance/>}
+          {selectedSection === "Admin & Superior Performance Area" && <PerformanceArea userIdToView={performanceAreaStaffId}/>}
+          {selectedSection === "Assesment Period" && <AssesmentPeriod />}
+          {selectedSection === "Staff Performance Summary" && <StaffPerformanceSummary setSelectedSection={setSelectedSection} setPerformanceAreaStaffId={setPerformanceAreaStaffId}/>}
+
         </div>
       </div>
 
@@ -468,6 +795,131 @@ export default function Admin() {
                 className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
               >
                 Update Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showStaffModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-lg w-96">
+            <h2 className="text-2xl font-bold mb-4">Create Staff Account</h2>
+            <input
+              type="text"
+              value={newStaff.name}
+              onChange={(e) =>
+                setNewStaff({ ...newStaff, name: e.target.value })
+              }
+              placeholder="Full Name"
+              className="p-2 border border-gray-300 rounded w-full mb-4"
+            />
+            <input
+              type="email"
+              value={newStaff.email}
+              onChange={(e) =>
+                setNewStaff({ ...newStaff, email: e.target.value })
+              }
+              placeholder="Email"
+              className="p-2 border border-gray-300 rounded w-full mb-4"
+            />
+            <input
+              type="password"
+              value={newStaff.password}
+              onChange={(e) =>
+                setNewStaff({ ...newStaff, password: e.target.value })
+              }
+              placeholder="Password"
+              className="p-2 border border-gray-300 rounded w-full mb-4"
+            />
+
+            {/* Designation dropdown */}
+            <select
+              value={newStaff.designation}
+              onChange={(e) =>
+                setNewStaff({ ...newStaff, designation: e.target.value })
+              }
+              className="p-2 border border-gray-300 rounded w-full mb-4"
+            >
+              <option value="">Select Designation</option>
+              {designationOptions.map((designation, index) => (
+                <option key={index} value={designation}>
+                  {designation}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedFaculty}
+              onChange={(e) => handleFacultyChange(e.target.value)}
+              className="p-2 border border-gray-300 rounded w-full mb-4"
+            >
+              <option value="">Select Faculty</option>
+              {faculties.map((faculty) => (
+                <option key={faculty._id} value={faculty._id}>
+                  {faculty.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={newStaff.department}
+              onChange={(e) =>
+                setNewStaff({ ...newStaff, department: e.target.value })
+              }
+              className="p-2 border border-gray-300 rounded w-full mb-4"
+              disabled={!selectedFaculty}
+            >
+              <option value="">Select Department</option>
+              {filteredDepartments.map((dept) => (
+                <option key={dept._id} value={dept._id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowStaffModal(false)}
+                className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addStaff}
+                className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
+                disabled={
+                  !newStaff.name ||
+                  !newStaff.email ||
+                  !newStaff.password ||
+                  !selectedFaculty ||
+                  !newStaff.department ||
+                  !newStaff.designation
+                }
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showConfirmModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-lg w-1/3">
+            <h2 className="text-2xl font-bold mb-4">Confirm Removal</h2>
+            <p className="mb-6">
+              Are you sure you want to remove this staff? This action cannot be undone.
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRemoval}
+                className="py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
+              >
+                Remove
               </button>
             </div>
           </div>

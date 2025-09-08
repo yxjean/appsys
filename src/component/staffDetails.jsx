@@ -2,16 +2,17 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import { AppContent } from "../context/AppContext";
-import PerformanceReporting from "../component/performanceReporting";
-import AdminPerformanceReporting from "../component/adminPerformanceReporting";
 import moment from "moment";
 import EditSquareIcon from '@mui/icons-material/EditSquare';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import {
+  FaUser,
+} from "react-icons/fa";
 
-const StaffDetails = ({staffDetails}) => {
+const StaffDetails = ({ staffDetails, setSelectedSection, setPerformanceReportingStaffId}) => {
   const { backendUrl } = useContext(AppContent);
   const [ isNewBooking, setIsNewBooking ] = useState(true);
   const [ rows, setRows ] = useState([]);
@@ -25,8 +26,8 @@ const StaffDetails = ({staffDetails}) => {
   const [ bookingIdToEdit, setBookingIdToEdit ] = useState("");
   const [ calendarEvents, setCalendarEvents ] = useState([]);
   const [ events, setEvents ] = useState([]);
-  const [report, setReport] = useState("");
-  const [showReportModal, setShowReportModal] = useState(false);
+  const [ currUserData, setCurrUserData ] = useState(null);
+
 
 
   const columns = [
@@ -47,17 +48,19 @@ const StaffDetails = ({staffDetails}) => {
       field: "action", 
       headerName: "Action", 
       flex: 1, 
-      renderCell: (params)=> (
-        <div className="flex justify-center items-center h-full">
-          <EditSquareIcon onClick={ ()=> { setIsMdlShowing(true); setIsNewBooking(false); setBookingIdToEdit(params.row.id) }} className="cursor-pointer" />
-        </div>
-    )}
+      renderCell: (params)=> { 
+        return params.row.status === "pending"?(
+          <div className="flex justify-center items-center h-full">
+            <EditSquareIcon onClick={ ()=> { setIsMdlShowing(true); setIsNewBooking(false); setBookingIdToEdit(params.row.id) }} className="cursor-pointer" />
+          </div>
+        ):null;
+      }
+    }
   ]
 
   useEffect(()=>{
     onInit();
   },[])
-
 
   useEffect(()=>{
     const bookings = rows.filter(val=>val.status === "accepted").map((val)=>{
@@ -109,11 +112,15 @@ const StaffDetails = ({staffDetails}) => {
         return "green";
       case "rejected":
         return "red";
+      case "completed":
+        return "gray";
     }
   }
 
   async function onInit() {
     const userData = await axios.get(`${backendUrl}/api/user/data`,{ withCredentials: true });
+
+    setCurrUserData(userData.data.userData);
 
     getStaffAllBookings();
     getStaffEvents();
@@ -189,57 +196,44 @@ const StaffDetails = ({staffDetails}) => {
 
   }
 
-  const fetchStaffReport = async (id) => {
-    if (!id) {
-      toast.error("Invalid staff ID");
-      return;
-    }
-    try {
-      const { data } = await axios.get(
-        `http://localhost:4000/api/performance-report/${id}`,
-        { withCredentials: true }
-      );
-      if (data.success) {
-        setReport(data.reportData);
-        setShowReportModal(true);
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-
   return (
     <div className="w-full p-6">
       <h2 className="text-2xl font-bold">Staff Details</h2>
       <div className="flex items-center justify-center gap-20 my-6">
         <div className="flex items-center flex-col">
           <div class="w-40 h-40 rounded-lg bg-gray-200 flex items-center justify-center relative overflow-hidden cursor-pointer border-4 border-teal-500">
+          {staffDetails.profilePic ? (
             <img src={`http://localhost:4000/uploads/profile/${staffDetails.profilePic}`} alt="Profile Picture" class="w-full h-full object-cover"/>
+          ) : (
+            <FaUser siclassName="text-gray-400" />
+          )}
+            {/* <img src={`http://localhost:4000/uploads/profile/${staffDetails.profilePic}`} alt="Profile Picture" class="w-full h-full object-cover"/> */}
           </div>
           <strong>{staffDetails.name}</strong>
-          <strong>{staffDetails.id}</strong>
+          <button className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer" onClick={()=>{ setSelectedSection("Admin & Superior Performance Reporting"); setPerformanceReportingStaffId(staffDetails.id) }}>View Report</button>
         </div>
-        <div className="flex flex-col bg-teal-500 text-white items-center rounded-lg p-5">
-          <strong>{staffDetails.faculty}</strong>
-          <strong>{staffDetails.department}</strong>
-          <strong>{staffDetails.contactNumber}</strong>
-          <strong>{staffDetails.email}</strong>
-          <strong>{staffDetails.designation}</strong>
-          <strong>{staffDetails.qualifications}</strong>
-          <strong>{staffDetails.areaOfExpertise}</strong>
+        <div className="grid grid-cols-[180px_auto] bg-teal-500 text-white rounded-lg p-5 gap-y-2">
+          <span className="font-bold">Faculty</span>
+          <span>: {staffDetails.faculty}</span>
+
+          <span className="font-bold">Department</span>
+          <span>: {staffDetails.department}</span>
+
+          <span className="font-bold">Contact Number</span>
+          <span>: {staffDetails.contactNumber}</span>
+
+          <span className="font-bold">Email</span>
+          <span>: {staffDetails.email}</span>
+
+          <span className="font-bold">Designation</span>
+          <span>: {staffDetails.designation}</span>
+
+          <span className="font-bold">Qualifications</span>
+          <span>: {staffDetails.qualifications}</span>
+
+          <span className="font-bold">Area of Expertise</span>
+          <span>: {staffDetails.areaOfExpertise}</span>
         </div>
-      </div>
-      {/*View Report Button*/}
-      <div className="flex justify-end space-x-4">
-        <button
-          onClick={() => fetchStaffReport(staffDetails.id)}
-          className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer mb-5 ml-auto"
-        >
-          View Report
-        </button>
       </div>
       <div className="border-1 border-gray-200 rounded-lg mt-10 p-5">
         <h2 className="text-2xl font-bold mb-4">Calendar</h2>
@@ -254,26 +248,31 @@ const StaffDetails = ({staffDetails}) => {
           events={calendarEvents}
         />
       </div>
-      <div className="mt-10 flex flex-col">
-        <button onClick={()=>{setIsMdlShowing(true); setIsNewBooking(true)}} className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer mb-5 ml-auto">
-          New Booking
-        </button>
-        <DataGrid 
-          rows={rows}
-          columns={columns}
-          autoHeight
-          paginationModel={paginationModel}
-          onPaginationModelChange={setPaginationModel}
-          pageSizeOptions={[10]}
-          disableRowSelectionOnClick  
-          checkboxSelection={false}   
-          columnVisibilityModel={{id: false}}
-        />
-      </div>
+
+      {currUserData && currUserData.privileges === "view" &&
+        (
+          <div className="mt-10 flex flex-col">
+            <button onClick={()=>{setIsMdlShowing(true); setIsNewBooking(true)}} className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer mb-5 ml-auto">
+              New Booking
+            </button>
+            <DataGrid 
+              rows={rows}
+              columns={columns}
+              autoHeight
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
+              pageSizeOptions={[10]}
+              disableRowSelectionOnClick  
+              checkboxSelection={false}   
+              columnVisibilityModel={{id: false}}
+            />
+          </div>
+        )
+      }
       { isMdlShowing && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="w-[50vw] bg-white p-5">
-              <h2 className="text-2xl font-bold">New Booking</h2>
+              <h2 className="text-2xl font-bold">{isNewBooking ? "New Booking" : "Update Booking"}</h2>
               <div className="mt-5">
                 <div class="mb-4">
                   <label class="block text-gray-700">Title</label>
@@ -300,21 +299,6 @@ const StaffDetails = ({staffDetails}) => {
             </div>
           </div>
 
-      )}
-      {showReportModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto mt-20 z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-3/4 h-[90%] overflow-y-auto">
-            <AdminPerformanceReporting staffId={staffDetails.id} />
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={() => setShowReportModal(false)}
-                className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

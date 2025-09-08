@@ -34,8 +34,8 @@ const Calendar = () => {
       flex: 1, 
       renderCell: (params)=> (
         <div className="flex justify-center items-center h-full gap-2">
-          {(params.row.status === "pending" || params.row.status === "rejected") && (<CheckCircleIcon onClick={ ()=>{ updateBookingStatus(params.row.id,"accepted") } } className="cursor-pointer text-green-500" />)}
-          {(params.row.status === "pending" || params.row.status === "accepted") && (<CancelIcon onClick={ ()=>{ updateBookingStatus(params.row.id,"rejected") } }  className="cursor-pointer text-red-500" />)}
+          {params.row.status === "pending" && (<CheckCircleIcon onClick={ ()=>{ updateBookingStatus(params.row.id,"accepted") } } className="cursor-pointer text-green-500" />) }
+          {params.row.status === "pending" && (<CancelIcon onClick={ ()=>{ updateBookingStatus(params.row.id,"rejected") } }  className="cursor-pointer text-red-500" />)}
         </div>
     )}
   ];
@@ -51,6 +51,8 @@ const Calendar = () => {
   const [ eventStartTime, setEventStartTime ] = useState("");
   const [ eventEndTime, setEventEndTime ] = useState("");
   const [ events, setEvents ] = useState([]);
+  const [ isEventMdlOnCreate, setIsEventMdlOnCreate ] = useState(true);
+  const [ selectedEventId, setSelectedEventId ] = useState(0);
 
   useEffect(()=>{
     onInit();
@@ -64,17 +66,21 @@ const Calendar = () => {
   useEffect(()=>{
     const bookings = rows.filter(val=>val.status === "accepted").map((val)=>{
       return {
+        _id: val.id,
         title: val.title,
         start: moment(val.startTime,"DD-MM-YYYY HH:mm A").toISOString(),
         end: moment(val.endTime,"DD-MM-YYYY HH:mm A").toISOString(),
+        type: "booking",
         color: '#006400'
     }})
 
     const userEvents = events.map((val)=>{
       return {
+        _id: val._id,
         title: val.title,
         start: val.startTime,
         end: val.endTime,
+        type: "event",
         color: '#3788d8'
     }})
 
@@ -95,6 +101,7 @@ const Calendar = () => {
     setEventTitle("")
     setEventStartTime("")
     setEventEndTime("")
+    setSelectedEventId(0);
   }
 
   async function createNewEvent() {
@@ -153,6 +160,17 @@ const Calendar = () => {
 
     getBookings()
   }
+  
+  async function deleteEvent(){
+    const { data } = await axios.delete(`${backendUrl}/api/event/${selectedEventId}`,{ withCredentials: true });
+
+    if(data.success){
+      setIsEventMdlShowing(false);
+      clearEventMdlInput();
+      toast.success("Event Deleted Successfully !");
+      getEvents();
+    }
+  }
 
 
   function getStatusColor(status) {
@@ -163,8 +181,43 @@ const Calendar = () => {
         return "green";
       case "rejected":
         return "red";
+      case "completed":
+        return "gray";
     }
   }
+
+  async function handleEventClick(ev){
+    if(ev.event._def.extendedProps.type !== "event"){
+      return;
+    }
+
+    const selectedEventId = ev.event._def.extendedProps._id;
+    setIsEventMdlOnCreate(false);
+    setIsEventMdlShowing(true);
+    setSelectedEventId(selectedEventId);
+
+    const { data } = await axios.get(`${backendUrl}/api/event/${selectedEventId}`,{ withCredentials: true });
+
+    setEventTitle(data.event.title);
+    setEventStartTime(moment(data.event.startTime).local().format("YYYY-MM-DDTHH:mm"));
+    setEventEndTime(moment(data.event.endTime).local().format("YYYY-MM-DDTHH:mm"));
+  }
+
+  async function updateEvent(ev){
+    const { data } = await axios.put(`${backendUrl}/api/event/${selectedEventId}`,{
+      title: eventTitle,
+      startTime: eventStartTime,
+      endTime: eventEndTime
+    },{ withCredentials: true });
+
+    if(data.success){
+      setIsEventMdlShowing(false);
+      clearEventMdlInput();
+      toast.success("Event Successfully Updated !");
+      getEvents();
+    }
+  }
+
 
 
   return (
@@ -172,7 +225,7 @@ const Calendar = () => {
       <div>
         <div className="flex justify-between mt-5">
           <h2 className="text-2xl font-bold mb-4">Calendar</h2>
-          <button onClick={()=>{ setIsEventMdlShowing(true) }}  className="float-right py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer mb-5 ml-auto">
+          <button onClick={()=>{ setIsEventMdlShowing(true); isEventMdlOnCreate(true) }}  className="float-right py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer mb-5 ml-auto">
             New Event
           </button>
         </div>
@@ -185,6 +238,7 @@ const Calendar = () => {
           }}
           initialView="dayGridMonth"
           events={calendarEvents}
+          eventClick={handleEventClick}
         />
       </div>
       
@@ -210,7 +264,7 @@ const Calendar = () => {
       { isEventMdlShowing && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="w-[50vw] bg-white p-5">
-              <h2 className="text-2xl font-bold">New Event</h2>
+              <h2 className="text-2xl font-bold">{isEventMdlOnCreate?"New Event":"Edit Event"}</h2>
               <div className="mt-5">
                 <div class="mb-4">
                   <label class="block text-gray-700">Title</label>
@@ -229,9 +283,22 @@ const Calendar = () => {
 
               <div className="flex justify-end gap-3 mt-10">
 
-                <button onClick={createNewEvent} className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer">
-                  Create
-                </button>
+                {
+                  isEventMdlOnCreate?(
+                    <button onClick={createNewEvent} className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer">
+                      Create
+                    </button>
+                  ):(
+                    <>
+                      <button onClick={updateEvent} className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer">
+                        Submit
+                      </button>
+                      <button onClick={deleteEvent} className="py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer">
+                        Delete
+                      </button>
+                    </>
+                  )
+                }
                 <button onClick={()=>{ clearEventMdlInput(); setIsEventMdlShowing(false)}} className="py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 cursor-pointer">Cancel</button>
               </div>
             </div>

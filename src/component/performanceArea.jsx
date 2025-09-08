@@ -9,7 +9,7 @@ import AdministrativeService from "./categories/AdministrativeService";
 import Consultancy from "./categories/Consultancy";
 import Research from "./categories/Research";
 
-const PerformanceArea = () => {
+const PerformanceArea = ({ userIdToView }) => {
   const [currSelectedPage, setCurrSelectedPage] = useState(1);
   const [pagination, setPagination] = useState([(
     <li>
@@ -26,7 +26,7 @@ const PerformanceArea = () => {
     total: 0,
     percentage: 0,
   });
-  const [ userData, setUserData ] = useState("");
+  const [ userData, setUserData ] = useState({});
 
 
   useEffect(() => {
@@ -48,8 +48,10 @@ const PerformanceArea = () => {
         { withCredentials: true }
       );
 
+
+
       const { data } = await axios.get(
-        "http://localhost:4000/api/performance-categories/user/"+userData.data.user._id,
+        "http://localhost:4000/api/performance-categories/user/"+((userIdToView && userIdToView !== "")?userIdToView:userData.data.user._id),
         { withCredentials: true }
       );
       if (data.success) {
@@ -64,8 +66,14 @@ const PerformanceArea = () => {
 
   const fetchEntries = async () => {
     try {
+      const userData = await axios.get(
+        "http://localhost:4000/api/user/profile",
+        { withCredentials: true }
+      );
+
+
       const { data } = await axios.get(
-        "http://localhost:4000/api/performance-entries",
+        "http://localhost:4000/api/performance-entries/user/"+((userIdToView && userIdToView !== "")?userIdToView:userData.data.user._id),
         { withCredentials: true }
       );
       if (data.success) {
@@ -488,13 +496,14 @@ const PerformanceArea = () => {
               </option>
             ))}
           </select>
-          <button
+          {
+            (!userIdToView || userIdToView === "") && <button
             onClick={() => setShowEntryModal(true)}
             className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
             disabled={!selectedCategory}
           >
             Add Entry
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -536,6 +545,7 @@ const PerformanceArea = () => {
                 {new Date(entry.date).toLocaleDateString("en-GB")}
               </p>
             )}
+
             <div>
               <strong>Details:</strong>
               <div className="bg-gray-100 p-3 rounded mt-2">

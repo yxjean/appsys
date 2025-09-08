@@ -13,7 +13,7 @@ import {
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-const PerformanceReporting = ({ staffId, reportData: initialReportData }) => {
+const PerformanceReporting = ({ staffId, reportData: initialReportData, userIdToView }) => {
   const [reportData, setReportData] = useState(initialReportData || null);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -22,13 +22,19 @@ const PerformanceReporting = ({ staffId, reportData: initialReportData }) => {
   useEffect(() => {
     fetchReportDataForLoggedInUser();
     fetchCategories();
-  }, [staffId, initialReportData]);
+  }, [staffId, initialReportData, userIdToView]);
 
   const fetchReportDataForLoggedInUser = async () => {
     setLoading(true);
     try {
+      const userData = await axios.get(
+        "http://localhost:4000/api/user/profile",
+        { withCredentials: true }
+      );
+
+
       const { data } = await axios.get(
-        "http://localhost:4000/api/performance-report",
+        "http://localhost:4000/api/performance-report/user/"+((userIdToView && userIdToView !== "")?userIdToView:userData.data.user._id),
         { withCredentials: true }
       );
       if (data.success) {
@@ -51,7 +57,7 @@ const PerformanceReporting = ({ staffId, reportData: initialReportData }) => {
       );
 
       const { data } = await axios.get(
-        "http://localhost:4000/api/performance-categories/user/"+userData.data.user._id,
+        "http://localhost:4000/api/performance-categories/user/"+((userIdToView && userIdToView !== "")?userIdToView:userData.data.user._id),
         { withCredentials: true }
       );
       if (data.success) {

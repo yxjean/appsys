@@ -3,8 +3,10 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import AdminPerformanceReporting from "./adminPerformanceReporting";
 import { FaPlus, FaTrash, FaFilter, FaSearch, FaUser } from "react-icons/fa";
+import { DataGrid } from '@mui/x-data-grid'; 
 
 const AcademicStaff = ({ onDepartmentChange }) => {
+  const [ rows, setRows ] = useState([]);
   const [currSelectedPage, setCurrSelectedPage] = useState(1);
   const [pagination, setPagination] = useState([(
     <li>
@@ -33,9 +35,27 @@ const AcademicStaff = ({ onDepartmentChange }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [staffIdToRemove, setStaffIdToRemove] = useState(null);
   const [searchResultsElement, setSearchResultsElement] = useState([]);
+  const [mdlCurrSelectedPage, setMdlCurrSelectedPage] = useState(1);
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10});
 
 
   const [searchType, setSearchType] = useState("name");
+
+  const columns = [
+    { field: "id", headerName: "ID", flex: 1, renderCell: (params)=>(
+      <a onClick={()=>{setSelectedSection('Staff Details'), setSelectedStaffDetails(params.row)}} style={{color: "blue", cursor: "pointer"}}>{params.row.id}</a>
+    )},
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "email", headerName: "Email", flex: 1 },
+    { field: "faculty", headerName: "Faculty", flex: 1 },
+    { field: "department", headerName: "Department", flex: 1 },
+    { field: "designation", headerName: "Designation", flex: 1 },
+    { field: "contactNumber", headerName: "Contact Number", flex: 1 },
+    { field: "qualifications", headerName: "Qualifications", flex: 1 },
+    { field: "areaOfExpertise", headerName: "Area of Expertise", flex: 1 }
+  ]
+
+
   const searchRef = useRef(null);
 
   const designationOptions = [
@@ -75,6 +95,32 @@ const AcademicStaff = ({ onDepartmentChange }) => {
       }
 
       return (
+        <div className="bg-white p-6 rounded shadow-lg h-screen overflow-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Academic Staff</h2>
+          </div>
+
+          <DataGrid
+            autoHeight
+            rows={rows}
+            columns={columns}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            pageSizeOptions={[10]}
+            disableRowSelectionOnClick  
+            checkboxSelection={false} 
+            initialState={{
+              sorting: {
+                sortModel: [{ field: "name", sort: "asc" }],
+              },
+            }}
+   
+          />
+        </div>
+      )
+
+
+      (
         <li
           key={staffMember._id}
           className="p-2 border border-gray-300 rounded flex justify-between items-center"

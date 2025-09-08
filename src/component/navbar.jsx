@@ -6,6 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import { Popover } from "@mui/material";
+import moment from 'moment';
 import { FaUser } from "react-icons/fa";
 
 const Navbar = ({selectedSection, setSelectedSection}) => {
@@ -81,6 +82,7 @@ const Navbar = ({selectedSection, setSelectedSection}) => {
   }
 
   function handleNotificationIconOnClick(ev) {
+    localStorage.setItem("lastNotificationOpenDateTime",moment().toISOString());
     setNotificationIconAnchorEl(ev.currentTarget)
     setIsNotificationPopoverShowing(!isNotificationPopoverShowing)
   }
@@ -149,34 +151,39 @@ const Navbar = ({selectedSection, setSelectedSection}) => {
               </ul>
             </div>
           )}
-          <NotificationsNoneIcon onClick={handleNotificationIconOnClick} className="cursor-pointer ml-5" />
-          <Popover
-            open={isNotificationPopoverShowing}
-            anchorEl={notificationIconAnchorEl}
-            onClose={handlePopoverOnClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-            slotProps={{
-              paper: {
-                sx: {
-                  width: 250,        // fixed width
-                  maxHeight: 400,    // maximum height
-                  overflowY: "auto", // scroll if content overflows
-                }}
-            }}
-          >
-            {
-              notifications.length? (notifications.map((val,ind)=> (
-                  <a className="flex flex-col px-5 pt-3 w-full hover:bg-gray-100" onClick={handleNotificationOnClick}>
-                    <strong>{val.title}</strong>
-                    <label className="mb-3 cursor-pointer">{val.description}</label>
-                    {notifications.length - 1 === ind? null:(<hr className="border-gray-400"/>)}
-                  </a>
-              ))) :(<strong className="px-5 py-5 block">No notification available</strong>)
-            }
-          </Popover>
+          <div id="divNotificationContainer" className={`ml-5 ${ (notifications.length && (!localStorage.getItem('lastNotificationOpenDateTime') || moment(notifications[0].createdAt).isAfter(moment(localStorage.getItem('lastNotificationOpenDateTime'))))?"newNotification":"" )}`}>
+            <NotificationsNoneIcon onClick={handleNotificationIconOnClick} className="cursor-pointer" />
+            <Popover
+              open={isNotificationPopoverShowing}
+              anchorEl={notificationIconAnchorEl}
+              onClose={handlePopoverOnClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              slotProps={{
+                paper: {
+                  sx: {
+                    width: 250,        // fixed width
+                    maxHeight: 400,    // maximum height
+                    overflowY: "auto", // scroll if content overflows
+                  }}
+              }}
+            >
+              {
+                notifications.length? (notifications.map((val,ind)=> (
+                    <a className="flex flex-col px-5 pt-3 w-full hover:bg-gray-100" onClick={handleNotificationOnClick}>
+                      <strong>{val.title}</strong>
+                      <div className="cursor-pointer">
+                        <label className="mb-3 pointer-events-none">{val.description}</label>
+                        <label className="text-[.75rem] text-gray-500 float-right pointer-events-none">{moment(val.createdAt).format("DD/MM/YYYY HH:mm")}</label>
+                      </div>
+                      {notifications.length - 1 === ind? null:(<hr className="border-gray-400"/>)}
+                    </a>
+                ))) :(<strong className="px-5 py-5 block">No notification available</strong>)
+              }
+            </Popover>
+          </div>
         </div>
       ) : (
         <button

@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+#divNotificationContainer.newNotification {
+  position: relative;
+  
+  &::after{
+    content: "";
+    position: absolute;
+    top: .35rem;
+    right: .25rem;
+    height: .5rem;
+    width: .5rem;
+    border-radius: 10rem;
+    background-color: red;
+  }
+}

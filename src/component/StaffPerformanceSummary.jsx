@@ -11,7 +11,7 @@ import Research from "./categories/Research";
 import { DataGrid } from "@mui/x-data-grid";
 import EditSquareIcon from '@mui/icons-material/EditSquare';
 
-const StaffPerformanceSummary = () => {
+const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId }) => {
 
 
   const [ rows, setRows ] = useState([]);
@@ -22,24 +22,29 @@ const StaffPerformanceSummary = () => {
   const [ selectedEntries, setSelectedEntries ] = useState("");
   const [ selectedMarks, setSelectedMarks ] = useState("");
   const [ isShowingConfirmAgreementMdl, setIsShowingConfirmAgreementMdl ] = useState(false);
+  const [ maxCap, setMaxCap ] = useState(0)
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const columns = [{
     field: "id",
-    headerName: "Id",
+    headerName: "Id"
   },
   {
     field: "name",
     headerName: "Name",
     flex: 1,
-    align: "left", headerAlign: "left"
+    renderCell: (params)=>(
+      <a className="cursor-pointer text-blue-800"
+        onClick={()=>{ setSelectedSection('Admin & Superior Performance Area'); setPerformanceAreaStaffId(params.row.id) }}
+      >{params.row.name}</a>
+    )
   },
   {
     field: "publication",
     headerName: "Publication",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"publication",params.row.performanceEntries.publication.length,params.formattedValue) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"publication",params.row.performanceEntries.publication.length,params.formattedValue,10) }}>
           <label> { params.row.performanceEntries.publication.length } e / { params.formattedValue } m</label>
         </div>
       )
@@ -52,7 +57,7 @@ const StaffPerformanceSummary = () => {
     headerName: "Research",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"research",params.row.performanceEntries.research.length,params.formattedValue) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"research",params.row.performanceEntries.research.length,params.formattedValue,10) }}>
           <label> { params.row.performanceEntries.research.length } e / { params.formattedValue } m</label>
         </div>
       )
@@ -65,7 +70,7 @@ const StaffPerformanceSummary = () => {
     headerName: "Teaching & Undergraduate Supervision",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"teachingAndUndergraduateSupervision",params.row.performanceEntries.teaching_and_undergraduate_supervision.length,params.formattedValue) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"teachingAndUndergraduateSupervision",params.row.performanceEntries.teaching_and_undergraduate_supervision.length,params.formattedValue,15) }}>
           <label> { params.row.performanceEntries.teaching_and_undergraduate_supervision.length } e / { params.formattedValue } m</label>
         </div>
       )
@@ -78,7 +83,7 @@ const StaffPerformanceSummary = () => {
     headerName: "Postgraduate Supervision",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"postgraduateSupervision",params.row.performanceEntries.postgraduate_supervision.length,params.formattedValue) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"postgraduateSupervision",params.row.performanceEntries.postgraduate_supervision.length,params.formattedValue,10) }}>
           <label> { params.row.performanceEntries.postgraduate_supervision.length } e / { params.formattedValue } m</label>
         </div>
       )
@@ -91,7 +96,7 @@ const StaffPerformanceSummary = () => {
     headerName: "VASI",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"vasi",params.row.performanceEntries.vasi.length,params.formattedValue) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"vasi",params.row.performanceEntries.vasi.length,params.formattedValue,10) }}>
           <label> { params.row.performanceEntries.vasi.length } e / { params.formattedValue } m</label>
         </div>
       )
@@ -104,7 +109,7 @@ const StaffPerformanceSummary = () => {
     headerName: "Admin Service",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"adminService",params.row.performanceEntries.admin_service.length,params.formattedValue) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"adminService",params.row.performanceEntries.admin_service.length,params.formattedValue,10) }}>
           <label> { params.row.performanceEntries.admin_service.length } e / { params.formattedValue } m</label>
         </div>
       )
@@ -117,7 +122,7 @@ const StaffPerformanceSummary = () => {
     headerName: "Consultancy",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"adminService",params.row.performanceEntries.publication.length,params.formattedValue) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"adminService",params.row.performanceEntries.publication.length,params.formattedValue,20000) }}>
           <label> { params.row.performanceEntries.consultancy.length } e / { params.formattedValue } m</label>
         </div>
       )
@@ -152,6 +157,12 @@ const StaffPerformanceSummary = () => {
   }
 
   function handleMdlSubmit(){
+
+    if(selectedMarks > maxCap){
+      toast.error("The max capacity for this area is "+ maxCap);
+      return;
+    }
+
     let changedVal = JSON.parse(JSON.stringify(rows));
     const userInd = rows.findIndex(val=>val.id === selectedUserId);
 
@@ -163,7 +174,7 @@ const StaffPerformanceSummary = () => {
     closeEditMdl();
   }
 
-  function handleCellDblClickEvent(userId, category,entries,marks){
+  function handleCellDblClickEvent(userId, category,entries,marks,maxCap){
     if(userData.privileges !== "view"){
       return;
     }
@@ -173,6 +184,7 @@ const StaffPerformanceSummary = () => {
     setSelectedCategory(category);
     setSelectedEntries(entries);
     setSelectedMarks(marks);
+    setMaxCap(maxCap);
   }
 
   function closeEditMdl(){
@@ -181,6 +193,7 @@ const StaffPerformanceSummary = () => {
     setSelectedCategory('');
     setSelectedEntries("");
     setSelectedMarks("");
+    setMaxCap(0);
   }
 
   async function getUserData(){
@@ -200,7 +213,7 @@ const StaffPerformanceSummary = () => {
         let teachingMarks = 0;
         let undergraduateMarks = 0;
         let teachingCount = 0;
-        let postgraduateMarks = val.performanceEntries.postgraduate_supervision.length;
+        let postgraduateMarks = 0;
         let vasiMarks = val.performanceEntries.vasi.length * 2;
         let adminServiceMarks = val.performanceEntries.admin_service.length * 2;
         let consultancyMarks = 0;
@@ -210,7 +223,7 @@ const StaffPerformanceSummary = () => {
           const details = JSON.parse(vle.details);
           const type = details.type.toLowerCase();
           const category = details.category.toLowerCase();
-          if(type === "journal")
+          if(type === "journal" || type === "conference")
           {
             if(category === "wos"){
               publicationMarks += 2
@@ -222,13 +235,19 @@ const StaffPerformanceSummary = () => {
               publicationMarks += 0.5
             }
           }
-          else if(type === "conference"){
-            publicationMarks += 1
-          }
           else if(type === "book chapter"){
             publicationMarks += 0.5
           }
         })
+
+        val.performanceEntries.postgraduate_supervision.forEach((vle,idx)=>{
+          const details = JSON.parse(vle.details);
+          const programmeLevel = details.programmeLevel.toLowerCase();
+
+          postgraduateMarks += programmeLevel === "master"?1:2;
+        })
+
+
 
         val.performanceEntries.teaching_and_undergraduate_supervision.forEach((vle,idx)=>{
           const details = JSON.parse(vle.details);
@@ -255,11 +274,10 @@ const StaffPerformanceSummary = () => {
         })
 
 
-        /*if(teachingCount) {
-          teachingMarks = teachingMarks / teachingCount;
-        }*/
+        // if(teachingCount) {
+        //   teachingMarks = teachingMarks / teachingCount;
+        // }
 
-        // Cap each category’s max score
         if(publicationMarks > 10) publicationMarks = 10;
         if(researchMarks > 10) researchMarks = 10;
         if(teachingMarks > 5) teachingMarks = 5;
@@ -286,6 +304,7 @@ const StaffPerformanceSummary = () => {
           parseFloat(val["admin_service"]) + 
           parseFloat(val["consultancy"]);
 
+
         val["grade"] = "F";
 
         if(val["total_marks"] >= 80){
@@ -309,13 +328,17 @@ const StaffPerformanceSummary = () => {
       <div className="w-full p-6 flex flex-col min-h-screen">
         <div className="flex flex-col justify-between gap-8">
           <h2 className="text-2xl font-bold">Staff Performance Result Summary</h2>
+          <p className="text-sm text-gray-500">e = entries; m = marks</p>
           <div className="flex flex-col justify-center cursor-pointer">
             <DataGrid 
               rows={rows}
               columns={columns}
               disableOnClickRowSelection={true}
-              getRowHeight={() => 'auto'}
+              
               initialState={{
+                sorting: {
+                  sortModel: [{ field: "name", sort: "asc" }],
+                },
                 columns: {
                   columnVisibilityModel: {
                     id: false,   
@@ -328,9 +351,12 @@ const StaffPerformanceSummary = () => {
                 },
               }}
             />
-            <div className="flex justify-end mt-4">
-              <button onClick={()=>{ setIsShowingConfirmAgreementMdl(true) }} className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer">Confirm Agreement</button>
-            </div>
+            {
+               userData && userData.privileges === "view" && 
+              (<div className="flex justify-end mt-4">
+                <button onClick={()=>{ setIsShowingConfirmAgreementMdl(true) }} className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer">Confirm Agreement</button>
+              </div>)
+            }
             <div className="w-full pt-4 px-4">
               <div className="text-center font-bold underline mb-2">
                 Grading System
@@ -342,13 +368,14 @@ const StaffPerformanceSummary = () => {
                 <span>F - No Expectation</span>
               </div>
             </div>
+
           </div>
         </div>
       </div>
       {
 
         isShowingEditMdl && 
-        (<div className="fixed top-0 left-0 w-screen h-screen bg-black/50 z-[10000] justify-center items-center flex">
+        (<div className="fixed top-0 left-0 w-screen h-screen bg-black/50 z-[1000] justify-center items-center flex">
           <div className="w-[30vw] bg-white rounded overflow-hidden">
             <div className="p-4 bg-gray-100">
               <h1 className="text-xl font-bold">Edit Marks</h1>
