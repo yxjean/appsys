@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import AddIcon from '@mui/icons-material/Add'
+import AddIcon from '@mui/icons-material/Add';
 import {
   FaPlus,
   FaTrash,
@@ -329,8 +329,12 @@ const Faculties = ({
     .sort((a, b) => a.name.localeCompare(b.name)); // Sort staff alphabetically
 
   function addDepartmentInput() {
+    // If no department yet, or the last one is filled → allow add
     if(!facultyMdlDepartmentInputs.length || facultyMdlDepartmentInputs.at(-1)) {
       setFacultyMdlDepartmentInputs(prevItem=>[...prevItem,""])
+    }  else {
+    // If the last one is empty → block and show toast
+    toast.warning("Please fill in the current department before adding a new one.");
     }
   }
 

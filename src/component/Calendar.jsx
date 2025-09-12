@@ -104,20 +104,42 @@ const Calendar = () => {
     setSelectedEventId(0);
   }
 
-  async function createNewEvent() {
-    const { data } = await axios.post(`${backendUrl}/api/event/create`,{
-      user: currUserId,
-      title: eventTitle,
-      startTime: eventStartTime,
-      endTime: eventEndTime
-    },{ withCredentials: true })
+async function createNewEvent() {
+  // Validation check before API call
+  if (!eventTitle || !eventStartTime || !eventEndTime) {
+    toast.error("Please fill in all the input fields.");
+    return;
+  }
 
+  // Check if end time is before start time
+  if (new Date(eventEndTime) < new Date(eventStartTime)) {
+    toast.error("End time cannot be earlier than start time.");
+    return;
+  }
 
-    if(data.success) {
+  try {
+    const { data } = await axios.post(
+      `${backendUrl}/api/event/create`,
+      {
+        user: currUserId,
+        title: eventTitle,
+        startTime: eventStartTime,
+        endTime: eventEndTime,
+      },
+      { withCredentials: true }
+    );
+
+    if (data.success) {
       getEvents();
       setIsEventMdlShowing(false);
+      toast.success("Event added successfully.");
     }
+  } catch (err) {
+    toast.error("Failed to add event. Please try again.");
+    console.error(err);
   }
+}
+
 
   async function getEvents() {
     if(!currUserId) {
@@ -167,7 +189,7 @@ const Calendar = () => {
     if(data.success){
       setIsEventMdlShowing(false);
       clearEventMdlInput();
-      toast.success("Event Deleted Successfully !");
+      toast.success("Event Deleted Successfully!");
       getEvents();
     }
   }
@@ -203,20 +225,36 @@ const Calendar = () => {
     setEventEndTime(moment(data.event.endTime).local().format("YYYY-MM-DDTHH:mm"));
   }
 
-  async function updateEvent(ev){
-    const { data } = await axios.put(`${backendUrl}/api/event/${selectedEventId}`,{
-      title: eventTitle,
-      startTime: eventStartTime,
-      endTime: eventEndTime
-    },{ withCredentials: true });
+async function updateEvent(ev) {
+  // Validation check before API call
+  if (!eventTitle || !eventStartTime || !eventEndTime) {
+    toast.error("Please fill in all the input fields.");
+    return;
+  }
 
-    if(data.success){
+  try {
+    const { data } = await axios.put(
+      `${backendUrl}/api/event/${selectedEventId}`,
+      {
+        title: eventTitle,
+        startTime: eventStartTime,
+        endTime: eventEndTime,
+      },
+      { withCredentials: true }
+    );
+
+    if (data.success) {
       setIsEventMdlShowing(false);
       clearEventMdlInput();
-      toast.success("Event Successfully Updated !");
+      toast.success("Event Successfully Updated!");
       getEvents();
     }
+  } catch (err) {
+    toast.error("Failed to update event. Please try again.");
+    console.error(err);
   }
+}
+
 
 
 

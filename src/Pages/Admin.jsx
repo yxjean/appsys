@@ -63,10 +63,15 @@ export default function Admin() {
 
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 1, renderCell: (params)=>(
-      <a onClick={()=>{setSelectedSection('Staff Details'), setSelectedStaffDetails(params.row)}} style={{color: "blue", cursor: "pointer"}}>{params.row.id}</a>
+    { field: "id", headerName: "ID", flex: 1 },
+    { 
+      field: "name", 
+      headerName: "Name", 
+      flex: 1,
+      renderCell: (params)=>(
+      <a className="cursor-pointer text-blue-800"
+        onClick={()=>{setSelectedSection('Staff Details'), setSelectedStaffDetails(params.row)}}>{params.row.name}</a>
     )},
-    { field: "name", headerName: "Name", flex: 1 },
     { field: "email", headerName: "Email", flex: 1 },
     { field: "faculty", headerName: "Faculty", flex: 1 },
     { field: "department", headerName: "Department", flex: 1 },
@@ -75,7 +80,7 @@ export default function Admin() {
     { field: "qualifications", headerName: "Qualifications", flex: 1 },
     { field: "areaOfExpertise", headerName: "Area of Expertise", flex: 1 },
     { 
-      headerName: "actions",  
+      headerName: "Actions",  
       renderCell: (params)=>(
         <div className="flex justify-center items-center h-full">
           <CancelIcon onClick={ ()=>{ setStaffIdToRemove(params.row.id); setShowConfirmModal(true) } }  className="cursor-pointer text-red-500" />
@@ -687,6 +692,16 @@ export default function Admin() {
                 pageSizeOptions={[10]}
                 disableRowSelectionOnClick  
                 checkboxSelection={false}   
+                initialState={{
+                  columns: {
+                    columnVisibilityModel: {
+                      id: false,   
+                    },
+                  },
+                  sorting: {
+                    sortModel: [{ field: "name", sort: "asc" }],
+                  },
+                }}
               />
             </div>
 

@@ -22,6 +22,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
   const [ selectedEntries, setSelectedEntries ] = useState("");
   const [ selectedMarks, setSelectedMarks ] = useState("");
   const [ isShowingConfirmAgreementMdl, setIsShowingConfirmAgreementMdl ] = useState(false);
+  const [ hasConfirmedAgreement, setHasConfirmedAgreement ] = useState(false);
   const [ maxCap, setMaxCap ] = useState(0)
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -35,7 +36,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     flex: 1,
     renderCell: (params)=>(
       <a className="cursor-pointer text-blue-800"
-        onClick={()=>{ setSelectedSection('Admin & Superior Performance Area'); setPerformanceAreaStaffId(params.row.id) }}
+        onClick={()=>{ setSelectedSection('Admin & Superior Performance Area'); setPerformanceAreaStaffId(params.row.id) }} 
       >{params.row.name}</a>
     )
   },
@@ -44,8 +45,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Publication",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"publication",params.row.performanceEntries.publication.length,params.formattedValue,10) }}>
-          <label> { params.row.performanceEntries.publication.length } e / { params.formattedValue } m</label>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"publication",params.row.publicationEntries.length,params.formattedValue,10) }}>
+          <label> { params.row.publicationEntries } e / { params.formattedValue } m</label>
         </div>
       )
     },
@@ -57,8 +58,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Research",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"research",params.row.performanceEntries.research.length,params.formattedValue,10) }}>
-          <label> { params.row.performanceEntries.research.length } e / { params.formattedValue } m</label>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"research",params.row.researchEntries.length,params.formattedValue,10) }}>
+          <label> { params.row.researchEntries } e / { params.formattedValue } m</label>
         </div>
       )
     },
@@ -70,8 +71,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Teaching & Undergraduate Supervision",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"teachingAndUndergraduateSupervision",params.row.performanceEntries.teaching_and_undergraduate_supervision.length,params.formattedValue,15) }}>
-          <label> { params.row.performanceEntries.teaching_and_undergraduate_supervision.length } e / { params.formattedValue } m</label>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"teachingAndUndergraduateSupervision",params.row.teachingAndUndergraduateSupervisionEntries.length,params.formattedValue,15) }}>
+          <label> { params.row.teachingAndUndergraduateSupervisionEntries } e / { params.formattedValue } m</label>
         </div>
       )
     },
@@ -79,12 +80,12 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     align: "center", headerAlign: "center"
   },
   {
-    field: "PostgraduateSupervision",
+    field: "postgraduateSupervision",
     headerName: "Postgraduate Supervision",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"postgraduateSupervision",params.row.performanceEntries.postgraduate_supervision.length,params.formattedValue,10) }}>
-          <label> { params.row.performanceEntries.postgraduate_supervision.length } e / { params.formattedValue } m</label>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"postgraduateSupervision",params.row.postgraduateSupervisionEntries.length,params.formattedValue,10) }}>
+          <label> { params.row.postgraduateSupervisionEntries } e / { params.formattedValue } m</label>
         </div>
       )
     },
@@ -96,8 +97,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "VASI",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"vasi",params.row.performanceEntries.vasi.length,params.formattedValue,10) }}>
-          <label> { params.row.performanceEntries.vasi.length } e / { params.formattedValue } m</label>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"vasi",params.row.vasiEntries.length,params.formattedValue,10) }}>
+          <label> { params.row.vasiEntries } e / { params.formattedValue } m</label>
         </div>
       )
     },
@@ -109,8 +110,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Admin Service",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"adminService",params.row.performanceEntries.admin_service.length,params.formattedValue,10) }}>
-          <label> { params.row.performanceEntries.admin_service.length } e / { params.formattedValue } m</label>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"admin_service",params.row.adminServiceEntries.length,params.formattedValue,10) }}>
+          <label> { params.row.adminServiceEntries } e / { params.formattedValue } m</label>
         </div>
       )
     },
@@ -122,8 +123,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Consultancy",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"adminService",params.row.performanceEntries.publication.length,params.formattedValue,20000) }}>
-          <label> { params.row.performanceEntries.consultancy.length } e / { params.formattedValue } m</label>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"consultancy",params.row.consultancyEntries.length,params.formattedValue,20000) }}>
+          <label> { params.row.consultancyEntries } e / { params.formattedValue } m</label>
         </div>
       )
     },
@@ -148,11 +149,14 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     getUserAllPerformanceEnries()
   },[])
 
-  function handleConfirmAgreementBtn(){
-    const { data } = axios.post("/api/staffPerformanceSummary",rows,{withCredentials: true});
+  async function handleConfirmAgreementBtn(){
+    const { data } = await axios.post(`${backendUrl}/api/staffPerformanceSummary`,{
+      confirmedAgreement: rows
+    },{withCredentials: true});
 
     if(data.success){
       setIsShowingConfirmAgreementMdl(false);
+      setHasConfirmedAgreement(true);
     }
   }
 
@@ -165,9 +169,24 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
 
     let changedVal = JSON.parse(JSON.stringify(rows));
     const userInd = rows.findIndex(val=>val.id === selectedUserId);
+    const valChanged = parseFloat(selectedMarks) - parseFloat(changedVal[userInd][selectedCategory]);
 
 
     changedVal[userInd][selectedCategory] = selectedMarks;
+    changedVal[userInd]["total_marks"] += valChanged;
+
+
+    changedVal[userInd]["grade"] = "F";
+
+    if(changedVal[userInd]["total_marks"] >= 80){
+      changedVal[userInd]["grade"] = "A";
+    }
+    else if(changedVal[userInd]["total_marks"] >= 60){
+      changedVal[userInd]["grade"] = "B";
+    }
+    else if(changedVal[userInd]["total_marks"] >= 50){
+      changedVal[userInd]["grade"] = "C";
+    }
 
     setRows(changedVal);
 
@@ -203,10 +222,63 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
 
   async function getUserAllPerformanceEnries(){
     const { data } = await axios.get(`${backendUrl}/api/performance-entries/all`, { withCredentials: true })
+    const confirmedAgreement = await axios.get(`${backendUrl}/api/staffPerformanceSummary`,{ withCredentials: true });
 
-    if(data.success) {
+
+
+    if(data.success && confirmedAgreement.data.success) {
+      if(confirmedAgreement.data.confirmedAgreement.length){
+        setHasConfirmedAgreement(true);
+      }
+
+
+
+
       setRows(data.allUserPerformanceEntries.map((val,ind)=>{
+        let hasModifiedMarks = false;
+
+        if(confirmedAgreement.data.confirmedAgreement.length){
+          confirmedAgreement.data.confirmedAgreement[0].confirmedAgreement.forEach((vle)=>{
+            if(val._id === vle.staffId._id){
+              val = vle;
+              val.id = val.staffId._id;
+              val.name = val.staffId.name;
+              val["publication"] = val.publicationMarks;
+              val["research"] = val.researchMarks;
+              val["teachingAndUndergraduateSupervision"] = val.teachingAndUndergraduateSupervisionMarks;
+              val["postgraduateSupervision"] = val.postgraduateSupervisionMarks;
+              val["vasi"] = val.vasiMarks;
+              val["admin_service"] = val.adminServiceMarks;
+              val["consultancy"] = val.consultancyMarks;
+              val["total_marks"] = val.totalMarks;
+
+
+              hasModifiedMarks = true;
+              return false;
+            }
+          })
+        }
+
+
+        if(hasModifiedMarks){
+          return val;
+        }
+
+        
+        
         val.id = val._id;
+
+
+
+        val.publicationEntries = val.performanceEntries.publication.length;
+        val.researchEntries = val.performanceEntries.research.length;
+        val.teachingAndUndergraduateSupervisionEntries = val.performanceEntries.teaching_and_undergraduate_supervision.length;
+        val.postgraduateSupervisionEntries = val.postgraduate_supervision?val.postgraduate_supervision.length:0;
+        val.vasiEntries = val.performanceEntries.vasi.length;
+        val.adminServiceEntries = val.performanceEntries.admin_service.length;
+        val.consultancyEntries = val.performanceEntries.consultancy.length;
+
+
 
         let publicationMarks = 0;
         let researchMarks = val.performanceEntries.research.length * 2;
@@ -291,7 +363,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         val["publication"] = (val["performance_area_score_distribution"].filter(val=> val.name === "Publication")[0].quantity * publicationMarks / 10).toFixed(1);
         val["research"] = (val["performance_area_score_distribution"].filter(val=> val.name === "Research")[0].quantity *  researchMarks / 10).toFixed(1);
         val["teachingAndUndergraduateSupervision"] = (val["performance_area_score_distribution"].filter(val=> val.name === "Teaching & Undergraduate Supervision")[0].quantity *  (teachingMarks + undergraduateMarks) / 15).toFixed(1);
-        val["PostgraduateSupervision"] = (val["performance_area_score_distribution"].filter(val=> val.name === "Postgraduate Supervision")[0].quantity *  postgraduateMarks / 10).toFixed(1);
+        val["postgraduateSupervision"] = (val["performance_area_score_distribution"].filter(val=> val.name === "Postgraduate Supervision")[0].quantity *  postgraduateMarks / 10).toFixed(1);
         val["vasi"] = (val["performance_area_score_distribution"].filter(val=> val.name === "VASI")[0].quantity *  vasiMarks / 10).toFixed(1);
         val["admin_service"] = (val["performance_area_score_distribution"].filter(val=> val.name === "Administrative Service")[0].quantity *  adminServiceMarks / 10).toFixed(1);
         val["consultancy"] = (val["performance_area_score_distribution"].filter(val=> val.name === "Consultancy")[0].quantity * consultancyMarks / 20000).toFixed(1);
@@ -299,11 +371,10 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         val["total_marks"] = parseFloat(val["publication"]) + 
           parseFloat(val["research"]) + 
           parseFloat(val["teachingAndUndergraduateSupervision"]) + 
-          parseFloat(val["PostgraduateSupervision"]) + 
+          parseFloat(val["postgraduateSupervision"]) + 
           parseFloat(val["vasi"]) + 
           parseFloat(val["admin_service"]) + 
           parseFloat(val["consultancy"]);
-
 
         val["grade"] = "F";
 
@@ -334,7 +405,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
               rows={rows}
               columns={columns}
               disableOnClickRowSelection={true}
-              
+              getRowHeight={() => 'auto'}
               initialState={{
                 sorting: {
                   sortModel: [{ field: "name", sort: "asc" }],
@@ -345,14 +416,9 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
                   },
                 },
               }}
-              sx={{
-                "& .MuiDataGrid-columnHeaderTitle": {
-                  fontWeight: "bold",
-                },
-              }}
             />
             {
-               userData && userData.privileges === "view" && 
+               userData && userData.privileges === "view" && !hasConfirmedAgreement &&
               (<div className="flex justify-end mt-4">
                 <button onClick={()=>{ setIsShowingConfirmAgreementMdl(true) }} className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer">Confirm Agreement</button>
               </div>)
@@ -408,7 +474,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
               <h1 className="text-xl font-bold">Confirm Grading Approval</h1>
             </div>
             <div className="flex flex-col items-center justify-center p-8">
-              By agreeing to the grading. you confirm that no further edits will be allowed.
+              By agreeing to the grading. You confirm that no further edits will be allowed.
             </div>
             <div className="p-2 flex  gap-2 justify-end border-t border-gray-200">
               <button className="py-2 px-4 bg-gray-300 text-white rounded hover:bg-gray-500 cursor-pointer" onClick={()=>{ setIsShowingConfirmAgreementMdl(false) }}>Cancel</button>

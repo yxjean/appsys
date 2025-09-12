@@ -60,7 +60,7 @@ export default function Staff() {
     { 
       field: "name", headerName: "Name", flex: 1,
       renderCell: (params)=>(
-        <a onClick={()=>{setSelectedSection('Staff Details'), setSelectedStaffDetails(params.row)}} style={{color: "blue", cursor: "pointer"}}>{params.row.name}</a>
+        <a className="cursor-pointer text-blue-800" onClick={()=>{setSelectedSection('Staff Details'), setSelectedStaffDetails(params.row)}}>{params.row.name}</a>
       )
     },
     { field: "email", headerName: "Email", flex: 1 },
@@ -448,11 +448,65 @@ export default function Staff() {
                       id: false,   
                     },
                   },
-                                    sorting: {
+                  sorting: {
                     sortModel: [{ field: "name", sort: "asc" }],
                   },
                 }}
               />
+
+
+              {/* Search bar */}
+            {/*}<div className="mb-4 relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <FaSearch className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg pl-10 p-2.5 w-full"
+                  placeholder="Search staff by name..."
+                  value={staffSearchQuery}
+                  onChange={(e) => setStaffSearchQuery(e.target.value)}
+                />
+              </div>
+
+
+            <ul className="space-y-2">
+                {filteredViewableStaff.length > 0 ? (
+                  filteredViewableStaff.sort((a, b) => a.name.localeCompare(b.name)).map((staffMember) => (
+                    <li
+                      key={staffMember._id}
+                      className="p-2 border border-gray-300 rounded flex justify-between items-center"
+                    >
+                      <span>{staffMember.name}</span>
+                      <button
+                        onClick={() => viewStaffProfile(staffMember._id)}
+                        className="py-1 px-3 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
+                      >
+                        View Profile
+                      </button>
+                    </li>
+                  ))
+                ) : (
+                  <li className="p-4 text-center text-gray-500">
+                    {staffSearchQuery
+                      ? "No staff members match your search"
+                      : "No viewable staff available"}
+                  </li>
+                )}
+              </ul>
+              <div class="flex justify-center mt-10 cursor-pointer">
+                <nav aria-label="Page navigation example">
+                  <ul class="inline-flex -space-x-px text-base h-10">
+                    <li>
+                      <a onClick={()=>{currSelectedPage > 1 && setCurrSelectedPage(currSelectedPage - 1)}} class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">Previous</a>
+                    </li>
+                    {pagination}
+                    <li>
+                      <a onClick={()=>{ currSelectedPage < pagination.length && setCurrSelectedPage(currSelectedPage + 1)}} class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">Next</a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>*/}
             </div>
           )}
           {selectedSection === "Staff Report" && selectedStaff && (

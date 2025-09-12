@@ -16,8 +16,8 @@ export default function AssesmentPeriod(){
     },{ withCredentials: true }) 
 
     if(data.success){
-      setStartDate(moment(data.assessmentPeriod[0].startDate).format("YYYY-MM-DDTHH:MM"));
-      setEndDate(moment(data.assessmentPeriod[0].endDate).format("YYYY-MM-DDTHH:MM"));
+      setStartDate(moment(data.assessmentPeriod[0].startDate).format("YYYY-MM-DDTHH:mm"));
+      setEndDate(moment(data.assessmentPeriod[0].endDate).format("YYYY-MM-DDTHH:mm"));
     }
   }
 
@@ -42,7 +42,7 @@ export default function AssesmentPeriod(){
         <div>
           <strong>Start Date: </strong>
           <input 
-            onChange={setStartDate}
+            onChange={(e) => setStartDate(e.target.value)}
             value={startDate}
             type="datetime-local" 
             className="border border-gray-300 ml-2"/>
@@ -50,7 +50,7 @@ export default function AssesmentPeriod(){
         <div>
           <strong>End Date: </strong>
           <input 
-            onChange={setEndDate}
+            onChange={(e) => setEndDate(e.target.value)}
             value={endDate}
             type="datetime-local" 
             className="border border-gray-300 ml-2"/>

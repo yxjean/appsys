@@ -10,6 +10,11 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
   const [projectScope, setProjectScope] = useState("");
   const [fundingAmount, setFundingAmount] = useState("");
   const [file, setFile] = useState(null);
+  const [ totalAmt, setTotalAmt ] = useState("");
+  const [ individualAmt, setIndividualAmt ] = useState("");
+  const [ memberName, setMemberName ] = useState("");
+  const [ letterFile, setLetterFile ] = useState(null);
+  const [ slipFile, setSlipFile ] = useState(null);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -26,15 +31,15 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
         "details",
         JSON.stringify({
           projectTitle,
-          client,
           startDate,
           endDate,
-          role,
-          projectScope,
-          fundingAmount,
+          totalAmt,
+          individualAmt,
+          memberName,
         })
       );
-      formData.append("document", file);
+      formData.append("letterFile", letterFile);
+      formData.append("slipFile", slipFile);
 
       const { data } = await axios.post(
         "http://localhost:4000/api/performance-entries",
@@ -66,7 +71,7 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
             required
           />
         </div>
-        <div>
+        {/*<div>
           <label className="block font-bold mb-2">Client/Organization</label>
           <input
             type="text"
@@ -75,7 +80,7 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
             className="p-2 border border-gray-300 rounded w-full"
             required
           />
-        </div>
+        </div>*/}
         <div>
           <label className="block font-bold mb-2">Start Date</label>
           <input
@@ -96,7 +101,7 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
             required
           />
         </div>
-        <div>
+        {/*<div>
           <label className="block font-bold mb-2">Role</label>
           <input
             type="text"
@@ -134,6 +139,68 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
             <input
               type="file"
               onChange={handleFileChange}
+              className="block w-full text-base text-gray-700
+                         file:mr-4 file:py-2 file:px-4
+                         file:rounded file:border-0
+                         file:text-base file:font-semibold
+                         file:bg-blue-50 file:text-blue-700
+                         hover:file:bg-blue-100
+                         border border-gray-300 rounded"
+            />
+          </div>
+        </div>*/}
+        <div>
+          <label className="block font-bold mb-2">Total Amount (RM)</label>
+          <input
+            type="number"
+            value={totalAmt}
+            onChange={(e) => setTotalAmt(e.target.value)}
+            className="p-2 border border-gray-300 rounded w-full"
+            required
+          />
+        </div>
+        <div>
+          <label className="block font-bold mb-2">Individual Amount (RM)</label>
+          <input
+            type="number"
+            value={individualAmt}
+            onChange={(e) => setIndividualAmt(e.target.value)}
+            className="p-2 border border-gray-300 rounded w-full"
+            required
+          />
+        </div>
+        <div>
+          <label className="block font-bold mb-2">Member (name)</label>
+          <input
+            type="text"
+            value={memberName}
+            onChange={(e) => setMemberName(e.target.value)}
+            className="p-2 border border-gray-300 rounded w-full"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block font-bold mb-2">Upload Letter</label>
+          <div className="relative">
+            <input
+              type="file"
+              onChange={ev=> setLetterFile(ev.target.files[0]) }
+              className="block w-full text-base text-gray-700
+                         file:mr-4 file:py-2 file:px-4
+                         file:rounded file:border-0
+                         file:text-base file:font-semibold
+                         file:bg-blue-50 file:text-blue-700
+                         hover:file:bg-blue-100
+                         border border-gray-300 rounded"
+            />
+          </div>
+        </div>
+        <div className="mb-4">
+          <label className="block font-bold mb-2">Upload Slip</label>
+          <div className="relative">
+            <input
+              type="file"
+              onChange={ev=>setSlipFile(ev.target.files[0])}
               className="block w-full text-base text-gray-700
                          file:mr-4 file:py-2 file:px-4
                          file:rounded file:border-0
