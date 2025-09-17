@@ -184,12 +184,11 @@ async function createNewBooking() {
 
   try {
     const { data } = await axios.post(
-      backendUrl + "/api/booking/create",
-      {
+      backendUrl+"/api/booking/create", {
         bookedById: currUserId,
         bookedToId: staffDetails.id,
         title: bookingTitle,
-        // type: bookingType,
+        //type: bookingType,
         startTime: bookingStartTime,
         endTime: bookingEndTime,
       },
@@ -230,9 +229,9 @@ async function updateBookingDetails() {
       `${backendUrl}/api/booking/${bookingIdToEdit}`,
       {
         title: bookingTitle,
-        // type: bookingType,
+        //type: bookingType,
         startTime: bookingStartTime,
-        endTime: bookingEndTime,
+        endTime: bookingEndTime
       },
       { withCredentials: true }
     );

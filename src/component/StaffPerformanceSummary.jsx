@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { renderToString } from "react-dom/server";
 import Publication from "./categories/Publication";
 import PostgraduateSupervision from "./categories/PostgraduateSupervision";
 import TeachingUndergraduateSupervision from "./categories/TeachingUndergraduateSupervision";
@@ -10,6 +11,8 @@ import Consultancy from "./categories/Consultancy";
 import Research from "./categories/Research";
 import { DataGrid } from "@mui/x-data-grid";
 import EditSquareIcon from '@mui/icons-material/EditSquare';
+import PrintIcon from '@mui/icons-material/Print';
+import StaffPerformanceSummaryPrintTemplate from './staffPerformanceSummaryPrintTemplate';
 
 const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId }) => {
 
@@ -24,7 +27,9 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
   const [ isShowingConfirmAgreementMdl, setIsShowingConfirmAgreementMdl ] = useState(false);
   const [ hasConfirmedAgreement, setHasConfirmedAgreement ] = useState(false);
   const [ maxCap, setMaxCap ] = useState(0)
+  const [ reportData, setReportData ] = useState(null);
 
+  const componentRef = useRef(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const columns = [{
     field: "id",
@@ -143,6 +148,14 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Grade",
     flex: 1,
     align: "center", headerAlign: "center"
+  },
+  {
+    headerName: "Actions",
+    renderCell: (params)=>(
+      <div className="w-full h-full flex justify-center items-center">
+        <PrintIcon onClick={()=>{handleOnPrintButton(params.row.id)}}/>
+      </div>
+    )
   }]
 
   useEffect(()=>{
@@ -160,6 +173,48 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
       setHasConfirmedAgreement(true);
     }
   }
+
+
+
+
+  async function handleOnPrintButton(userId){
+    try{
+      const [ reportRes, userProfileRes, assessmentPeriodRes ] = await Promise.all([
+        axios.get(
+          "http://localhost:4000/api/performance-report/user/"+userId,
+          { withCredentials: true }
+        ),
+        axios.get(
+          "http://localhost:4000/api/user/profile/user/"+userId,
+          { withCredentials: true }
+        ),
+        axios.get(
+          "http://localhost:4000/api/assessment-period",
+          { withCredentials: true }
+        )        
+      ])
+
+
+      if(reportRes.data.success && userProfileRes.data.success && assessmentPeriodRes.data.success){
+        const html = renderToString(
+          <StaffPerformanceSummaryPrintTemplate reportData={reportRes.data.reportData} userData={userProfileRes.data.user} assessmentPeriod={assessmentPeriodRes.data.assessmentPeriod}/>
+        ) 
+
+        const printPreview = window.open("","_blank","width=800","height=600");
+        printPreview.document.open();
+        printPreview.document.write(html);
+        printPreview.document.close();
+        printPreview.focus();
+        printPreview.print();
+        printPreview.close();
+      }
+    }
+    catch(err){
+      toast.error(err.message);
+    }
+
+  }
+
 
   function handleMdlSubmit(){
 
@@ -225,10 +280,15 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     const { data } = await axios.get(`${backendUrl}/api/performance-entries/all`, { withCredentials: true })
     const confirmedAgreement = await axios.get(`${backendUrl}/api/staffPerformanceSummary`,{ withCredentials: true });
 
+
+
     if(data.success && confirmedAgreement.data.success) {
       if(confirmedAgreement.data.confirmedAgreement.length){
         setHasConfirmedAgreement(true);
       }
+
+
+
 
       setRows(data.allUserPerformanceEntries.map((val,ind)=>{
         let hasModifiedMarks = false;
@@ -248,17 +308,23 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
               val["consultancy"] = val.consultancyMarks;
               val["total_marks"] = val.totalMarks;
 
+
               hasModifiedMarks = true;
               return false;
             }
           })
         }
 
+
         if(hasModifiedMarks){
           return val;
         }
 
+        
+        
         val.id = val._id;
+
+
 
         val.publicationEntries = val.performanceEntries.publication.length;
         val.researchEntries = val.performanceEntries.research.length;
@@ -267,6 +333,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         val.vasiEntries = val.performanceEntries.vasi.length;
         val.adminServiceEntries = val.performanceEntries.admin_service.length;
         val.consultancyEntries = val.performanceEntries.consultancy.length;
+
+
 
         let publicationMarks = 0;
         let researchMarks = val.performanceEntries.research.length * 2;
@@ -277,6 +345,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         let vasiMarks = val.performanceEntries.vasi.length * 2;
         let adminServiceMarks = val.performanceEntries.admin_service.length * 2;
         let consultancyMarks = 0;
+
 
         val.performanceEntries.publication.forEach((vle,idx)=>{
           const details = JSON.parse(vle.details);
@@ -306,6 +375,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
           postgraduateMarks += programmeLevel === "master"?1:2;
         })
 
+
+
         val.performanceEntries.teaching_and_undergraduate_supervision.forEach((vle,idx)=>{
           const details = JSON.parse(vle.details);
           const teaching = details.teaching;
@@ -314,25 +385,26 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
           if(teaching){
             teachingCount++;
             teachingMarks += parseFloat(teaching.studentEvaluationRating);
-            teachingMarks /= 5;
           }
 
           if(undergraduateSupervision){
             undergraduateMarks += 2; 
           }
+
         })
 
         val.performanceEntries.consultancy.forEach((vle,idx)=>{
           const details = JSON.parse(vle.details);
-          const fundingAmt = parseFloat(details.fundingAmount);
+          const individualAmt = parseFloat(details.individualAmount);
+          const totalAmt = parseFloat(details.totalAmt);
 
-          consultancyMarks += fundingAmt;
+          consultancyMarks += individualAmt;
         })
 
 
-        // if(teachingCount) {
-        //   teachingMarks = teachingMarks / teachingCount;
-        // }
+        if(teachingCount) {
+          teachingMarks = teachingMarks / teachingCount;
+        }
 
         if(publicationMarks > 10) publicationMarks = 10;
         if(researchMarks > 10) researchMarks = 10;
@@ -360,6 +432,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
           parseFloat(val["admin_service"]) + 
           parseFloat(val["consultancy"]);
 
+
+
         val["grade"] = "F";
 
         if(val["total_marks"] >= 80){
@@ -371,6 +445,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         else if(val["total_marks"] >= 50){
           val["grade"] = "C";
         }
+
         return val;
       }))
 
@@ -448,7 +523,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
           </div>
         </div>)
       }
-    {
+      {
 
         isShowingConfirmAgreementMdl && 
         (<div className="fixed top-0 left-0 w-screen h-screen bg-black/50 z-[10000] justify-center items-center flex">
@@ -457,7 +532,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
               <h1 className="text-xl font-bold">Confirm Grading Approval</h1>
             </div>
             <div className="flex flex-col items-center justify-center p-8">
-              By agreeing to the grading. You confirm that no further edits will be allowed.
+              By agreeing to the grading. you confirm that no further edits will be allowed.
             </div>
             <div className="p-2 flex  gap-2 justify-end border-t border-gray-200">
               <button className="py-2 px-4 bg-gray-300 text-white rounded hover:bg-gray-500 cursor-pointer" onClick={()=>{ setIsShowingConfirmAgreementMdl(false) }}>Cancel</button>

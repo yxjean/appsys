@@ -10,8 +10,8 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
   const [projectScope, setProjectScope] = useState("");
   const [fundingAmount, setFundingAmount] = useState("");
   const [file, setFile] = useState(null);
-  const [ totalAmt, setTotalAmt ] = useState("");
-  const [ individualAmt, setIndividualAmt ] = useState("");
+  const [ totalAmount, setTotalAmt ] = useState("");
+  const [ individualAmount, setIndividualAmt ] = useState("");
   const [ memberName, setMemberName ] = useState("");
   const [ letterFile, setLetterFile ] = useState(null);
   const [ slipFile, setSlipFile ] = useState(null);
@@ -25,15 +25,16 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
 
     try {
       const formData = new FormData();
-      formData.append("title", projectTitle);
+      formData.append("title", "Consultancy Entry");
       formData.append("area", "Consultancy");
       formData.append(
         "details",
         JSON.stringify({
+          projectTitle,
           startDate,
           endDate,
-          totalAmt,
-          individualAmt,
+          totalAmount,
+          individualAmount,
           memberName,
         })
       );
@@ -152,7 +153,7 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
           <label className="block font-bold mb-2">Total Amount (RM)</label>
           <input
             type="number"
-            value={totalAmt}
+            value={totalAmount}
             onChange={(e) => setTotalAmt(e.target.value)}
             className="p-2 border border-gray-300 rounded w-full"
             required
@@ -162,7 +163,7 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
           <label className="block font-bold mb-2">Individual Amount (RM)</label>
           <input
             type="number"
-            value={individualAmt}
+            value={individualAmount}
             onChange={(e) => setIndividualAmt(e.target.value)}
             className="p-2 border border-gray-300 rounded w-full"
             required

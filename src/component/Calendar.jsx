@@ -104,42 +104,20 @@ const Calendar = () => {
     setSelectedEventId(0);
   }
 
-async function createNewEvent() {
-  // Validation check before API call
-  if (!eventTitle || !eventStartTime || !eventEndTime) {
-    toast.error("Please fill in all the input fields.");
-    return;
-  }
+  async function createNewEvent() {
+    const { data } = await axios.post(`${backendUrl}/api/event/create`,{
+      user: currUserId,
+      title: eventTitle,
+      startTime: eventStartTime,
+      endTime: eventEndTime
+    },{ withCredentials: true })
 
-  // Check if end time is before start time
-  if (new Date(eventEndTime) < new Date(eventStartTime)) {
-    toast.error("End time cannot be earlier than start time.");
-    return;
-  }
 
-  try {
-    const { data } = await axios.post(
-      `${backendUrl}/api/event/create`,
-      {
-        user: currUserId,
-        title: eventTitle,
-        startTime: eventStartTime,
-        endTime: eventEndTime,
-      },
-      { withCredentials: true }
-    );
-
-    if (data.success) {
+    if(data.success) {
       getEvents();
       setIsEventMdlShowing(false);
-      toast.success("Event added successfully.");
     }
-  } catch (err) {
-    toast.error("Failed to add event. Please try again.");
-    console.error(err);
   }
-}
-
 
   async function getEvents() {
     if(!currUserId) {
@@ -175,26 +153,13 @@ async function createNewEvent() {
   }
 
 
-async function updateBookingStatus(bookingId, status) {
-  try {
-    const { data } = await axios.put(
-      `${backendUrl}/api/booking/${bookingId}`,
-      { status },
-      { withCredentials: true }
-    );
+  async function updateBookingStatus(bookingId,status) {
+    await axios.put(`${backendUrl}/api/booking/${bookingId}`,{
+      status: status
+    },{ withCredentials: true })
 
-    if (data.success) {
-      getBookings();
-      toast.success(`Booking ${status} successfully!`);
-    } else {
-      toast.error("Failed to update booking status.");
-    }
-  } catch (err) {
-    console.error(err); // logs the actual error for debugging
-    toast.error("An error occurred while updating booking status.");
+    getBookings()
   }
-}
-
   
   async function deleteEvent(){
     const { data } = await axios.delete(`${backendUrl}/api/event/${selectedEventId}`,{ withCredentials: true });
@@ -202,7 +167,7 @@ async function updateBookingStatus(bookingId, status) {
     if(data.success){
       setIsEventMdlShowing(false);
       clearEventMdlInput();
-      toast.success("Event Deleted Successfully!");
+      toast.success("Event Deleted Successfully !");
       getEvents();
     }
   }
@@ -238,36 +203,20 @@ async function updateBookingStatus(bookingId, status) {
     setEventEndTime(moment(data.event.endTime).local().format("YYYY-MM-DDTHH:mm"));
   }
 
-async function updateEvent(ev) {
-  // Validation check before API call
-  if (!eventTitle || !eventStartTime || !eventEndTime) {
-    toast.error("Please fill in all the input fields.");
-    return;
-  }
+  async function updateEvent(ev){
+    const { data } = await axios.put(`${backendUrl}/api/event/${selectedEventId}`,{
+      title: eventTitle,
+      startTime: eventStartTime,
+      endTime: eventEndTime
+    },{ withCredentials: true });
 
-  try {
-    const { data } = await axios.put(
-      `${backendUrl}/api/event/${selectedEventId}`,
-      {
-        title: eventTitle,
-        startTime: eventStartTime,
-        endTime: eventEndTime,
-      },
-      { withCredentials: true }
-    );
-
-    if (data.success) {
+    if(data.success){
       setIsEventMdlShowing(false);
       clearEventMdlInput();
-      toast.success("Event Successfully Updated!");
+      toast.success("Event Successfully Updated !");
       getEvents();
     }
-  } catch (err) {
-    toast.error("Failed to update event. Please try again.");
-    console.error(err);
   }
-}
-
 
 
 
@@ -293,8 +242,8 @@ async function updateEvent(ev) {
         />
       </div>
       
-      {/* Bookings Section */}
-      {userType === "staff" && currUserPrivilege !== "view" && (
+      {
+        userType === "staff" && currUserPrivilege !== "view" && (
         <div className="mt-10">
           <h2 className="text-2xl font-bold mb-4">Bookings</h2>
           <DataGrid 
