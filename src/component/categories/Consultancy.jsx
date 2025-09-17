@@ -25,12 +25,11 @@ const Consultancy = ({ onEntryAdded = () => {} }) => {
 
     try {
       const formData = new FormData();
-      formData.append("title", "Consultancy Entry");
+      formData.append("title", projectTitle);
       formData.append("area", "Consultancy");
       formData.append(
         "details",
         JSON.stringify({
-          projectTitle,
           startDate,
           endDate,
           totalAmt,

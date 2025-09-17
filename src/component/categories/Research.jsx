@@ -23,12 +23,11 @@ const Research = ({ onEntryAdded = () => {} }) => {
 
     try {
       const formData = new FormData();
-      formData.append("title", "Research Entry");
+      formData.append("title", researchTitle);
       formData.append("area", "Research");
       formData.append(
         "details",
         JSON.stringify({
-          researchTitle,
           researchCategory,
           fundingAgency,
           fundingAmount,

@@ -80,7 +80,7 @@ export default function Admin() {
     { field: "qualifications", headerName: "Qualifications", flex: 1 },
     { field: "areaOfExpertise", headerName: "Area of Expertise", flex: 1 },
     { 
-      headerName: "Actions",  
+      headerName: "Action",  
       renderCell: (params)=>(
         <div className="flex justify-center items-center h-full">
           <CancelIcon onClick={ ()=>{ setStaffIdToRemove(params.row.id); setShowConfirmModal(true) } }  className="cursor-pointer text-red-500" />

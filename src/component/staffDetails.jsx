@@ -11,6 +11,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import {
   FaUser,
 } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const StaffDetails = ({ staffDetails, setSelectedSection, setPerformanceReportingStaffId}) => {
   const { backendUrl } = useContext(AppContent);
@@ -51,7 +52,16 @@ const StaffDetails = ({ staffDetails, setSelectedSection, setPerformanceReportin
       renderCell: (params)=> { 
         return params.row.status === "pending"?(
           <div className="flex justify-center items-center h-full">
-            <EditSquareIcon onClick={ ()=> { setIsMdlShowing(true); setIsNewBooking(false); setBookingIdToEdit(params.row.id) }} className="cursor-pointer" />
+            <EditSquareIcon onClick={ ()=> { 
+              setIsMdlShowing(true); 
+              setIsNewBooking(false); 
+              setBookingIdToEdit(params.row.id) 
+              
+              // Prefill directly from row
+              setBookingTitle(params.row.title);
+              setBookingStartTime(moment(params.row.startTime, "DD-MM-YYYY hh:mm A").format("YYYY-MM-DDTHH:mm"));
+              setBookingEndTime(moment(params.row.endTime, "DD-MM-YYYY hh:mm A").format("YYYY-MM-DDTHH:mm"));
+              }} className="cursor-pointer" />
           </div>
         ):null;
       }
@@ -159,42 +169,89 @@ const StaffDetails = ({ staffDetails, setSelectedSection, setPerformanceReportin
     setBookingIdToEdit("")
   } 
 
-  async function createNewBooking() {
+async function createNewBooking() {
+  // Input validation
+  if (!bookingTitle || !bookingStartTime || !bookingEndTime) {
+    toast.error("Please fill in all required fields.");
+    return;
+  }
+
+  // Check if end time is before start time
+  if (new Date(bookingEndTime) < new Date(bookingStartTime)) {
+    toast.error("End time cannot be earlier than start time.");
+    return;
+  }
+
+  try {
     const { data } = await axios.post(
-      backendUrl+"/api/booking/create", {
+      backendUrl + "/api/booking/create",
+      {
         bookedById: currUserId,
         bookedToId: staffDetails.id,
         title: bookingTitle,
-        //type: bookingType,
+        // type: bookingType,
         startTime: bookingStartTime,
-        endTime: bookingEndTime
+        endTime: bookingEndTime,
       },
       { withCredentials: true }
     );
 
-    if(data.success) {
+    if (data.success) {
+      toast.success("Booking created successfully!");
       getStaffAllBookings();
       setIsMdlShowing(false);
+    } else {
+      toast.error(data.message || "Failed to create booking.");
     }
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message ||
+      error.message ||
+      "An error occurred while creating booking."
+    );
+  }
+}
+
+async function updateBookingDetails() {
+  // Input validation
+  if (!bookingTitle || !bookingStartTime || !bookingEndTime) {
+    toast.error("Please fill in all required fields.");
+    return;
   }
 
-  async function updateBookingDetails() {
+  // Check if end time is before start time
+  if (new Date(bookingEndTime) <= new Date(bookingStartTime)) {
+    toast.error("End time must be later than start time.");
+    return;
+  }
+
+  try {
     const { data } = await axios.put(
-      `${backendUrl}/api/booking/${bookingIdToEdit}`, {
+      `${backendUrl}/api/booking/${bookingIdToEdit}`,
+      {
         title: bookingTitle,
-        //type: bookingType,
+        // type: bookingType,
         startTime: bookingStartTime,
-        endTime: bookingEndTime
+        endTime: bookingEndTime,
       },
       { withCredentials: true }
     );
 
-    if(data.success) {
+    if (data.success) {
+      toast.success("Booking updated successfully!");
       getStaffAllBookings();
       setIsMdlShowing(false);
+    } else {
+      toast.error(data.message || "Failed to update booking.");
     }
-
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message ||
+      error.message ||
+      "An error occurred while updating booking."
+    );
   }
+}
 
   return (
     <div className="w-full p-6">
@@ -210,7 +267,7 @@ const StaffDetails = ({ staffDetails, setSelectedSection, setPerformanceReportin
             {/* <img src={`http://localhost:4000/uploads/profile/${staffDetails.profilePic}`} alt="Profile Picture" class="w-full h-full object-cover"/> */}
           </div>
           <strong>{staffDetails.name}</strong>
-          <button className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer" onClick={()=>{ setSelectedSection("Admin & Superior Performance Reporting"); setPerformanceReportingStaffId(staffDetails.id) }}>View Report</button>
+          <button className="mt-8 py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer" onClick={()=>{ setSelectedSection("Admin & Superior Performance Reporting"); setPerformanceReportingStaffId(staffDetails.id) }}>View Report</button>
         </div>
         <div className="grid grid-cols-[180px_auto] bg-teal-500 text-white rounded-lg p-5 gap-y-2">
           <span className="font-bold">Faculty</span>

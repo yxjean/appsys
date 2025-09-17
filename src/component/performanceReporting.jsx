@@ -74,14 +74,22 @@ const PerformanceReporting = ({ staffId, reportData: initialReportData, userIdTo
     setSelectedCategory(e.target.value);
   };
 
-  const getFilteredEntries = () => {
-    if (!reportData) return [];
-    if (selectedCategory === "All") return reportData.publications;
+const getFilteredEntries = () => {
+  if (!reportData) return [];
+  let entries = [];
 
-    return reportData.publications.filter(
+  if (selectedCategory === "All") {
+    entries = reportData.publications;
+  } else {
+    entries = reportData.publications.filter(
       (entry) => entry.area === selectedCategory
     );
-  };
+  }
+
+  // Sort by date descending (latest first)
+  return entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+};
+
 
   const calculateCategoryProgress = (category) => {
     if (!reportData || !category) return { count: 0, total: 50 };

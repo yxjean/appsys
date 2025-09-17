@@ -45,7 +45,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Publication",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"publication",params.row.publicationEntries.length,params.formattedValue,10) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"publication",params.row.publicationEntries.length,params.formattedValue,params.row.performance_area_score_distribution?.find(d => d.name === "Publication")?.quantity || 0) }}>
           <label> { params.row.publicationEntries } e / { params.formattedValue } m</label>
         </div>
       )
@@ -58,7 +58,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Research",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"research",params.row.researchEntries.length,params.formattedValue,10) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"research",params.row.researchEntries.length,params.formattedValue,params.row.performance_area_score_distribution?.find(d => d.name === "Research")?.quantity || 0) }}>
           <label> { params.row.researchEntries } e / { params.formattedValue } m</label>
         </div>
       )
@@ -71,7 +71,8 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Teaching & Undergraduate Supervision",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"teachingAndUndergraduateSupervision",params.row.teachingAndUndergraduateSupervisionEntries.length,params.formattedValue,15) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"teachingAndUndergraduateSupervision",params.row.teachingAndUndergraduateSupervisionEntries.length,params.formattedValue,params.row.performance_area_score_distribution?.find(d => d.name === "Teaching & Undergraduate Supervision")?.quantity || 0
+  ) }}>
           <label> { params.row.teachingAndUndergraduateSupervisionEntries } e / { params.formattedValue } m</label>
         </div>
       )
@@ -84,7 +85,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Postgraduate Supervision",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"postgraduateSupervision",params.row.postgraduateSupervisionEntries.length,params.formattedValue,10) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"postgraduateSupervision",params.row.postgraduateSupervisionEntries.length,params.formattedValue,params.row.performance_area_score_distribution?.find(d => d.name === "Postgraduate Supervision")?.quantity || 0) }}>
           <label> { params.row.postgraduateSupervisionEntries } e / { params.formattedValue } m</label>
         </div>
       )
@@ -97,7 +98,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "VASI",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"vasi",params.row.vasiEntries.length,params.formattedValue,10) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"vasi",params.row.vasiEntries.length,params.formattedValue,params.row.performance_area_score_distribution?.find(d => d.name === "VASI")?.quantity || 0) }}>
           <label> { params.row.vasiEntries } e / { params.formattedValue } m</label>
         </div>
       )
@@ -110,7 +111,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Admin Service",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"admin_service",params.row.adminServiceEntries.length,params.formattedValue,10) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"admin_service",params.row.adminServiceEntries.length,params.formattedValue,params.row.performance_area_score_distribution?.find(d => d.name === "Administrative Service")?.quantity || 0) }}>
           <label> { params.row.adminServiceEntries } e / { params.formattedValue } m</label>
         </div>
       )
@@ -123,7 +124,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     headerName: "Consultancy",
     renderCell: (params)=>{
       return (
-        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"consultancy",params.row.consultancyEntries.length,params.formattedValue,20000) }}>
+        <div className="h-full w-full" onDoubleClick={()=>{ handleCellDblClickEvent(params.row.id,"consultancy",params.row.consultancyEntries.length,params.formattedValue,params.row.performance_area_score_distribution?.find(d => d.name === "Consultancy")?.quantity || 0) }}>
           <label> { params.row.consultancyEntries } e / { params.formattedValue } m</label>
         </div>
       )
@@ -224,15 +225,10 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     const { data } = await axios.get(`${backendUrl}/api/performance-entries/all`, { withCredentials: true })
     const confirmedAgreement = await axios.get(`${backendUrl}/api/staffPerformanceSummary`,{ withCredentials: true });
 
-
-
     if(data.success && confirmedAgreement.data.success) {
       if(confirmedAgreement.data.confirmedAgreement.length){
         setHasConfirmedAgreement(true);
       }
-
-
-
 
       setRows(data.allUserPerformanceEntries.map((val,ind)=>{
         let hasModifiedMarks = false;
@@ -252,23 +248,17 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
               val["consultancy"] = val.consultancyMarks;
               val["total_marks"] = val.totalMarks;
 
-
               hasModifiedMarks = true;
               return false;
             }
           })
         }
 
-
         if(hasModifiedMarks){
           return val;
         }
 
-        
-        
         val.id = val._id;
-
-
 
         val.publicationEntries = val.performanceEntries.publication.length;
         val.researchEntries = val.performanceEntries.research.length;
@@ -277,8 +267,6 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         val.vasiEntries = val.performanceEntries.vasi.length;
         val.adminServiceEntries = val.performanceEntries.admin_service.length;
         val.consultancyEntries = val.performanceEntries.consultancy.length;
-
-
 
         let publicationMarks = 0;
         let researchMarks = val.performanceEntries.research.length * 2;
@@ -289,7 +277,6 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         let vasiMarks = val.performanceEntries.vasi.length * 2;
         let adminServiceMarks = val.performanceEntries.admin_service.length * 2;
         let consultancyMarks = 0;
-
 
         val.performanceEntries.publication.forEach((vle,idx)=>{
           const details = JSON.parse(vle.details);
@@ -319,8 +306,6 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
           postgraduateMarks += programmeLevel === "master"?1:2;
         })
 
-
-
         val.performanceEntries.teaching_and_undergraduate_supervision.forEach((vle,idx)=>{
           const details = JSON.parse(vle.details);
           const teaching = details.teaching;
@@ -335,7 +320,6 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
           if(undergraduateSupervision){
             undergraduateMarks += 2; 
           }
-
         })
 
         val.performanceEntries.consultancy.forEach((vle,idx)=>{
@@ -387,7 +371,6 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         else if(val["total_marks"] >= 50){
           val["grade"] = "C";
         }
-
         return val;
       }))
 

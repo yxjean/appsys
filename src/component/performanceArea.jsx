@@ -290,7 +290,7 @@ const PerformanceArea = ({ userIdToView }) => {
         );
       }
 
-      //// Special formatting for Research
+      // Special formatting for Research
       if (area === "Research") {
         return (
           <div className="pl-2">

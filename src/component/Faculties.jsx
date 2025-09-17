@@ -365,9 +365,9 @@ const Faculties = ({
       </div>
       <ul className="space-y-2">
         {faculties.map((faculty) => (
-          <li key={faculty._id} className="border-2 border-teal-500 rounded">
+          <li key={faculty._id} className="border border-gray-500 rounded">
             <div className="flex justify-between items-center p-2">
-              <span className="text-2xl font-bold text-teal-500">
+              <span className="text-2xl font-bold">
                 {faculty.name}
               </span>
               <div className="flex space-x-2">
@@ -409,8 +409,8 @@ const Faculties = ({
                     key={dept._id}
                     className="p-2 border border-gray-500 rounded"
                   >
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold">{dept.name}</span>
+                    <div className="flex justify-between items-center font-semibold">
+                      <span>{dept.name} ({dept.staff.length})</span>
                       <div className="flex space-x-2">
                         <button
                           onClick={() => toggleDepartment(dept._id)}

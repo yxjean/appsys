@@ -175,13 +175,26 @@ async function createNewEvent() {
   }
 
 
-  async function updateBookingStatus(bookingId,status) {
-    await axios.put(`${backendUrl}/api/booking/${bookingId}`,{
-      status: status
-    },{ withCredentials: true })
+async function updateBookingStatus(bookingId, status) {
+  try {
+    const { data } = await axios.put(
+      `${backendUrl}/api/booking/${bookingId}`,
+      { status },
+      { withCredentials: true }
+    );
 
-    getBookings()
+    if (data.success) {
+      getBookings();
+      toast.success(`Booking ${status} successfully!`);
+    } else {
+      toast.error("Failed to update booking status.");
+    }
+  } catch (err) {
+    console.error(err); // logs the actual error for debugging
+    toast.error("An error occurred while updating booking status.");
   }
+}
+
   
   async function deleteEvent(){
     const { data } = await axios.delete(`${backendUrl}/api/event/${selectedEventId}`,{ withCredentials: true });
@@ -280,8 +293,8 @@ async function updateEvent(ev) {
         />
       </div>
       
-      {
-        userType === "staff" && currUserPrivilege !== "view" && (
+      {/* Bookings Section */}
+      {userType === "staff" && currUserPrivilege !== "view" && (
         <div className="mt-10">
           <h2 className="text-2xl font-bold mb-4">Bookings</h2>
           <DataGrid 
@@ -299,6 +312,7 @@ async function updateEvent(ev) {
         </div>
       )}
 
+      {/* Event Modal */}
       { isEventMdlShowing && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="w-[50vw] bg-white p-5">
