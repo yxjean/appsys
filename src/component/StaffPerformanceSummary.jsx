@@ -329,7 +329,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         val.publicationEntries = val.performanceEntries.publication.length;
         val.researchEntries = val.performanceEntries.research.length;
         val.teachingAndUndergraduateSupervisionEntries = val.performanceEntries.teaching_and_undergraduate_supervision.length;
-        val.postgraduateSupervisionEntries = val.postgraduate_supervision?val.postgraduate_supervision.length:0;
+        val.postgraduateSupervisionEntries = val.performanceEntries.postgraduate_supervision?val.performanceEntries.postgraduate_supervision.length:0;
         val.vasiEntries = val.performanceEntries.vasi.length;
         val.adminServiceEntries = val.performanceEntries.admin_service.length;
         val.consultancyEntries = val.performanceEntries.consultancy.length;
@@ -398,6 +398,10 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
           const individualAmt = parseFloat(details.individualAmount);
           const totalAmt = parseFloat(details.totalAmt);
 
+          if(!individualAmt){
+            console.log(details);
+          }
+
           consultancyMarks += individualAmt;
         })
 
@@ -414,6 +418,7 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         if(vasiMarks > 10) vasiMarks = 10;
         if(adminServiceMarks > 10) adminServiceMarks = 10;
         if(consultancyMarks > 20000) consultancyMarks = 20000;
+
 
 
         val["publication"] = (val["performance_area_score_distribution"].filter(val=> val.name === "Publication")[0].quantity * publicationMarks / 10).toFixed(1);
