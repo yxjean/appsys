@@ -12,7 +12,7 @@ import Research from "./categories/Research";
 import { DataGrid } from "@mui/x-data-grid";
 import EditSquareIcon from '@mui/icons-material/EditSquare';
 import PrintIcon from '@mui/icons-material/Print';
-import StaffPerformanceSummaryPrintTemplate from './staffPerformanceSummaryPrintTemplate';
+import AllStaffPerformanceResultSummaryPrintTemplate from './AllStaffPerformanceResultSummaryPrintTemplate';
 
 const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId }) => {
 
@@ -149,14 +149,15 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
     flex: 1,
     align: "center", headerAlign: "center"
   },
-  {
-    headerName: "Actions",
-    renderCell: (params)=>(
-      <div className="w-full h-full flex justify-center items-center">
-        <PrintIcon onClick={()=>{handleOnPrintButton(params.row.id)}}/>
-      </div>
-    )
-  }]
+  //{
+  //  headerName: "Actions",
+  //  renderCell: (params)=>(
+  //    <div className="w-full h-full flex justify-center items-center">
+  //      <PrintIcon onClick={()=>{handleOnPrintButton(params.row.id)}}/>
+  //    </div>
+  //  )
+  //}
+  ]
 
   useEffect(()=>{
     getUserData();
@@ -179,26 +180,24 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
 
   async function handleOnPrintButton(userId){
     try{
-      const [ reportRes, userProfileRes, assessmentPeriodRes ] = await Promise.all([
-        axios.get(
-          "http://localhost:4000/api/performance-report/user/"+userId,
-          { withCredentials: true }
-        ),
-        axios.get(
-          "http://localhost:4000/api/user/profile/user/"+userId,
-          { withCredentials: true }
-        ),
-        axios.get(
-          "http://localhost:4000/api/assessment-period",
-          { withCredentials: true }
-        )        
-      ])
-
-
-      if(reportRes.data.success && userProfileRes.data.success && assessmentPeriodRes.data.success){
-        const html = renderToString(
-          <StaffPerformanceSummaryPrintTemplate reportData={reportRes.data.reportData} userData={userProfileRes.data.user} assessmentPeriod={assessmentPeriodRes.data.assessmentPeriod}/>
-        ) 
+      const dataToPrint = {
+        columns: columns.filter(val=>val.field !== 'id').map(val=>val.headerName),
+        rows: rows.map((val)=>{
+          return {
+            name: val.name,
+            publication: `${val.publicationEntries} e / ${val.publication} m`,
+            research: `${val.researchEntries} e / ${val.research} m`,
+            teachingAndUndergraduateSupervision: `${val.teachingAndUndergraduateSupervisionEntries} e / ${val.teachingAndUndergraduateSupervision} m`,
+            postgraduateSupervision: `${val.postgraduateSupervisionEntries} e / ${val.postgraduateSupervision} m`,
+            vasi: `${val.vasiEntries} e / ${val.vasi} m`,
+            adminService: `${val.adminServiceEntries} e / ${val.admin_service} m`,
+            consultancy: `${val.consultancyEntries} e / ${val.consultancy} m`,
+            totalMarks: val.total_marks,
+            grade: val.grade
+          }
+        })
+      }
+        const html = renderToString( <AllStaffPerformanceResultSummaryPrintTemplate dataToPrint={dataToPrint}/>)
 
         const printPreview = window.open("","_blank","width=800","height=600");
         printPreview.document.open();
@@ -207,7 +206,6 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
         printPreview.focus();
         printPreview.print();
         printPreview.close();
-      }
     }
     catch(err){
       toast.error(err.message);
@@ -462,7 +460,10 @@ const StaffPerformanceSummary = ({ setSelectedSection, setPerformanceAreaStaffId
       <div className="w-full p-6 flex flex-col min-h-screen">
         <div className="flex flex-col justify-between gap-8">
           <h2 className="text-2xl font-bold">Staff Performance Result Summary</h2>
-          <p className="text-sm text-gray-500">e = entries; m = marks</p>
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-500">e = entries; m = marks</p>
+            <PrintIcon sx={{ cursor: "pointer" }} onClick={handleOnPrintButton}/>
+          </div>
           <div className="flex flex-col justify-center cursor-pointer">
             <DataGrid 
               rows={rows}

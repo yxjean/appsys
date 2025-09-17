@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect  } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Publication from "./categories/Publication";
@@ -8,6 +8,9 @@ import VASI from "./categories/VASI";
 import AdministrativeService from "./categories/AdministrativeService";
 import Consultancy from "./categories/Consultancy";
 import Research from "./categories/Research";
+import PrintIcon from '@mui/icons-material/Print';
+import StaffPerformanceSummaryPrintTemplate from './staffPerformanceSummaryPrintTemplate.jsx';
+import { renderToString } from "react-dom/server";
 
 const PerformanceArea = ({ userIdToView }) => {
   const [currSelectedPage, setCurrSelectedPage] = useState(1);
@@ -479,31 +482,74 @@ const PerformanceArea = ({ userIdToView }) => {
     );
   };
 
+  async function handleOnPrintButton(){
+    try{
+      const [ reportRes, userProfileRes, assessmentPeriodRes ] = await Promise.all([
+        axios.get(
+          "http://localhost:4000/api/performance-report/user/"+userIdToView,
+          { withCredentials: true }
+        ),
+        axios.get(
+          "http://localhost:4000/api/user/profile/user/"+userIdToView,
+          { withCredentials: true }
+        ),
+        axios.get(
+          "http://localhost:4000/api/assessment-period",
+          { withCredentials: true }
+        )        
+      ])
+
+
+      if(reportRes.data.success && userProfileRes.data.success && assessmentPeriodRes.data.success){
+        const html = renderToString(
+          <StaffPerformanceSummaryPrintTemplate reportData={reportRes.data.reportData} userData={userProfileRes.data.user} assessmentPeriod={assessmentPeriodRes.data.assessmentPeriod}/>
+        ) 
+
+        const printPreview = window.open("","_blank","width=800","height=600");
+        printPreview.document.open();
+        printPreview.document.write(html);
+        printPreview.document.close();
+        printPreview.focus();
+        printPreview.print();
+        printPreview.close();
+      }
+    }
+    catch(err){
+      toast.error(err.message);
+    }
+
+  }
+
   return (
     <div className="w-full p-6 flex flex-col min-h-screen">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Performance Area Management</h2>
-        <div className="flex items-center">
-          <select
-            value={selectedCategory}
-            onChange={handleCategoryChange}
-            className="py-2 px-4 bg-gray-200 text-gray-700 rounded mr-2"
-          >
-            <option value="">Select Area</option>
-            {categories.map((category) => (
-              <option  value={category.name}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          {
-            (!userIdToView || userIdToView === "") && <button
-            onClick={() => setShowEntryModal(true)}
-            className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
-            disabled={!selectedCategory}
-          >
-            Add Entry
-          </button>}
+        <div className="flex gap-4 items-center">
+          <PrintIcon sx={{
+            cursor: "pointer"
+          }} onClick={handleOnPrintButton}/>
+          <div className="flex items-center">
+            <select
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              className="py-2 px-4 bg-gray-200 text-gray-700 rounded mr-2"
+            >
+              <option value="">Select Area</option>
+              {categories.map((category) => (
+                <option  value={category.name}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            {
+              (!userIdToView || userIdToView === "") && <button
+              onClick={() => setShowEntryModal(true)}
+              className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600 cursor-pointer"
+              disabled={!selectedCategory}
+            >
+              Add Entry
+            </button>}
+          </div>
         </div>
       </div>
 
