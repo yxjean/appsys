@@ -348,7 +348,36 @@ const PerformanceArea = ({ userIdToView }) => {
               ))}
 
               {/* Add file link if document exists */}
-              {entry.document && (
+              {entry.letterFile  && (
+                <div className="mb-2">
+                  <span className="font-semibold text-gray-700">Letter Document:</span>{" "}
+                  <a
+                    href={`http://localhost:4000/uploads/${entry.letterFile}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    View Document
+                  </a>
+                </div>
+              )}
+              {entry.slipFile  && (
+                <div className="pt-2">
+                  <span className="font-semibold text-gray-700">Slip Document:</span>{" "}
+                  <a
+                    href={`http://localhost:4000/uploads/${entry.slipFile}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    View Document
+                  </a>
+                </div>
+              )}
+
+
+
+              {/*entry.document && (
                 <div className="mt-3 pt-2 border-t border-gray-200">
                   <span className="font-semibold text-gray-700">Document:</span>{" "}
                   <a
@@ -360,7 +389,7 @@ const PerformanceArea = ({ userIdToView }) => {
                     View Document
                   </a>
                 </div>
-              )}
+              )*/}
             </div>
           </div>
         );
