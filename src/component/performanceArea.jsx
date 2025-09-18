@@ -531,7 +531,7 @@ const PerformanceArea = ({ userIdToView }) => {
 
       if(reportRes.data.success && userProfileRes.data.success && assessmentPeriodRes.data.success){
         const html = renderToString(
-          <StaffPerformanceSummaryPrintTemplate reportData={reportRes.data.reportData} userData={userProfileRes.data.user} assessmentPeriod={assessmentPeriodRes.data.assessmentPeriod}/>
+          <StaffPerformanceSummaryPrintTemplate reportData={reportRes.data.reportData} userData={userProfileRes.data.user} assessmentPeriod={assessmentPeriodRes.data.assessmentPeriod[0]}/>
         ) 
 
         const printPreview = window.open("","_blank","width=800","height=600");
