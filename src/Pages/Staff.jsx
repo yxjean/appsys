@@ -44,6 +44,8 @@ export default function Staff() {
   const [selectedStaffDetails, setSelectedStaffDetails] = useState({});
   const [ performanceAreaStaffId, setPerformanceAreaStaffId ] = useState("");
   const [ performanceReportingStaffId, setPerformanceReportingStaffId ] = useState("");
+  const [ staffEntriesSummaryRows, setStaffEntriesSummaryRows ] = useState([]);
+  const [ staffEntriesSummaryPaginationModel, setStaffEntriesSummaryPaginationModel] = useState({ page: 0, pageSize: 10});
   //const [pagination, setPagination] = useState([(
   //  <li>
   //    <a aria-current="page" class="flex items-center justify-center px-4 h-10 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">1</a>
@@ -71,6 +73,60 @@ export default function Staff() {
     { field: "qualifications", headerName: "Qualifications", flex: 1 },
     { field: "areaOfExpertise", headerName: "Area of Expertise", flex: 1 }
   ]
+
+  const staffEntriesSummaryColumns = [
+    {
+      field: "id",
+      headerName: "Id",
+    },
+    {
+      field: "name",
+      headerName: "Staff",
+      flex: 1
+    },
+    {
+      field: "Publication",
+      headerName: "Publication",
+      flex: 1
+    },
+    {
+      field: "Research",
+      headerName: "Research",
+      flex: 1
+    },
+    {
+      field: "Teaching & Undergraduate Supervision",
+      headerName: "Teaching & Undergrad",
+      flex: 1
+    },
+    {
+      field: "Postgraduate Supervision",
+      headerName: "Postgrad",
+      flex: 1
+    },
+    {
+      field: "VASI",
+      headerName: "VASI",
+      flex: 1
+    },
+    {
+      field: "Administrative Service",
+      headerName: "Admin Service",
+      flex: 1
+    },
+    {
+      field: "Consultancy",
+      headerName: "Consultancy",
+      flex: 1
+    },
+    {
+      field: "total",
+      headerName: "Total Entries",
+      flex: 1
+    }
+  ]
+
+
 
   useEffect(() => {
     fetchViewableStaff();
@@ -316,6 +372,7 @@ export default function Staff() {
         }
       }
 
+      setStaffEntriesSummaryRows(staffWithEntries);
       setStaffEntriesData(staffWithEntries);
     } catch (error) {
       toast.error("Failed to fetch staff entries");
@@ -746,9 +803,24 @@ export default function Staff() {
       {showStaffSummary && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded shadow-lg w-4/5 max-h-[90vh] overflow-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Staff Entries Summary</h2>
-              <div className="flex space-x-2">
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold mb-8">Staff Entries Summary</h2>
+              <DataGrid 
+                rows={staffEntriesSummaryRows}
+                columns={staffEntriesSummaryColumns}
+                autoHeight
+                paginationModel={staffEntriesSummaryPaginationModel}
+                onPaginationModelChange={setStaffEntriesSummaryPaginationModel}
+                pageSizeOptions={[10]}
+                disableRowSelectionOnClick  
+                checkboxSelection={false}   
+                columnVisibilityModel={{id: false}}
+              />
+            </div>
+
+
+
+              {/*<div className="flex space-x-2">
                 <button
                   onClick={() => setSortOrder("alphabetical")}
                   className={`p-2 rounded ${
@@ -848,7 +920,7 @@ export default function Staff() {
                   </li>
                 </ul>
               </nav>
-            </div>
+            </div>*/}
 
             <div className="flex justify-end mt-4">
               <button
